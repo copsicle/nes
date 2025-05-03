@@ -11,8 +11,6 @@ struct registers
     uint16_t PC; // Program counter
     uint8_t S; // Stack Pointer
     uint8_t P; // Status Register
-
-    //uint8_t OP; // NOT AN OFFICIAL REGISTER, FOR INTERNAL USE
 };
 
 // Official instructions

@@ -22,11 +22,11 @@ int main(int argc, char *argv[])
 
     uint8_t inst = 0x0A;
     regs->A = 0x80;
-    uint8_t* result = NULL;
+    uint8_t* opr = NULL;
     uint8_t cycles = 0;
-    address_function_ptr ptr1 = addressing_modes[inst];
-    if (ptr1) cycles += ptr1(regs, mem, result);
-    cycles += instructions[inst](regs, result);
+    address_function_ptr ptr = addressing_modes[inst];
+    if (ptr) cycles += ptr(regs, mem, opr);
+    cycles += instructions[inst](regs, opr);
     
     free(mem->GENERAL);
     free(mem->STACK);
