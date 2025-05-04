@@ -32,6 +32,7 @@ uint8_t PUSH_WORD(struct registers* reg, struct memory* mem, uint16_t opr);
 uint8_t POP_WORD(struct registers* reg, struct memory* mem, uint16_t* opr);
 
 uint8_t PIRQ (struct registers* reg, struct memory* mem, uint8_t* opr);
+uint8_t PRTS (struct registers* reg, struct memory* mem, uint8_t* opr);
 
 uint8_t JMPB (struct registers* reg, struct memory* mem, uint8_t* opr);
 uint8_t JMPN (struct registers* reg, struct memory* mem, uint8_t* opr);
@@ -52,7 +53,7 @@ static address_function_ptr addressing_modes[0x100] = {
 /*3X*/ NULL, INDY, NULL, INDY, NULL, ZPX , ZPX , ZPX , NULL, ABY , NULL, ABY , NULL, ABX , ABX , ABX,
 /*4X*/ NULL, INDX, NULL, INDX, NULL, ZP  , ZP  , ZP  , PSHA, IMM , NULL, IMM , JMPB, ABS , ABS , ABS,
 /*5X*/ NULL, INDY, NULL, INDY, NULL, ZPX , ZPX , ZPX , NULL, ABY , NULL, ABY , NULL, ABX , ABX , ABX,
-/*6X*/ NULL, INDX, NULL, INDX, NULL, ZP  , ZP  , ZP  , PLLA, IMM , NULL, IMM , JMPN, ABS , ABS , ABS,
+/*6X*/ PRTS, INDX, NULL, INDX, NULL, ZP  , ZP  , ZP  , PLLA, IMM , NULL, IMM , JMPN, ABS , ABS , ABS,
 /*7X*/ NULL, INDY, NULL, INDY, NULL, ZPX , ZPX , ZPX , NULL, ABY , NULL, ABY , NULL, ABX , ABX , ABX,
 /*8X*/ IMM , INDX, IMM , INDX, ZP  , ZP  , ZP  , ZP  , NULL, IMM , NULL, IMM , ABS , ABS , ABS , ABS,
 /*9X*/ NULL, INDY, NULL, INDY, ZPX , ZPX , ZPY , ZPY , NULL, ABY , NULL, ABY , ABX , ABX , ABY , ABY,

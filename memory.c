@@ -193,3 +193,10 @@ uint8_t PLLA (struct registers* reg, struct memory* mem, uint8_t* opr)
 {
     return POP_BYTE(reg, mem, &reg->A);
 }
+
+uint8_t PRTS (struct registers* reg, struct memory* mem, uint8_t* opr)
+{
+    uint8_t pop = POP_WORD(reg,mem, &(reg->PC));
+    (reg->PC)++;
+    return 3 + pop;
+}
