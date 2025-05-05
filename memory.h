@@ -1,49 +1,57 @@
 #ifndef _MEMORY_H
 #define _MEMORY_H
 
+#include "6502.h"
 #include <stdint.h>
 
-struct memory
+typedef struct
 {
-    uint8_t* ZEROPAGE;
-    uint8_t* STACK;
-    uint8_t* GENERAL;
-    uint8_t* PPU;
-    uint8_t* APUIO;
-    uint8_t* CARTRAM;
-    uint8_t* CARTROM;
-};
+    uint16_t start;
+    uint16_t end;
+    uint8_t* ptr;
+} memmap;
 
-uint8_t IMM (struct registers* reg, struct memory* mem, uint8_t* opr);
-uint8_t PTR (struct registers* reg, struct memory* mem, uint16_t* ptr);
-uint8_t ZP (struct registers* reg, struct memory* mem, uint8_t* opr);
-uint8_t ZPX (struct registers* reg, struct memory* mem, uint8_t* opr);
-uint8_t ZPY (struct registers* reg, struct memory* mem, uint8_t* opr);
-uint8_t ABS (struct registers* reg, struct memory* mem, uint8_t* opr);
-uint8_t ABX (struct registers* reg, struct memory* mem, uint8_t* opr);
-uint8_t ABY (struct registers* reg, struct memory* mem, uint8_t* opr);
-uint8_t IN (struct registers* reg, struct memory* mem, uint8_t* opr);
-uint8_t INDX (struct registers* reg, struct memory* mem, uint8_t* opr);
-uint8_t INDY (struct registers* reg, struct memory* mem, uint8_t* opr);
+typedef struct 
+{
+    memmap* ZEROPAGE;
+    memmap* STACK;
+    memmap* GENERAL;
+    memmap* PPU;
+    memmap* APUIO;
+    memmap* CARTRAM;
+    memmap* CARTROM;
+} memory;
 
-uint8_t PUSH_BYTE (struct registers* reg, struct memory* mem, uint8_t opr);
-uint8_t POP_BYTE (struct registers* reg, struct memory* mem, uint8_t* opr);
-uint8_t PUSH_WORD(struct registers* reg, struct memory* mem, uint16_t opr);
-uint8_t POP_WORD(struct registers* reg, struct memory* mem, uint16_t* opr);
+uint8_t IMM (registers* reg, memory* mem, uint8_t* opr);
+uint8_t PTR (registers* reg, memory* mem, uint16_t* ptr);
+uint8_t ZP (registers* reg, memory* mem, uint8_t* opr);
+uint8_t ZPX (registers* reg, memory* mem, uint8_t* opr);
+uint8_t ZPY (registers* reg, memory* mem, uint8_t* opr);
+uint8_t ABS (registers* reg, memory* mem, uint8_t* opr);
+uint8_t ABX (registers* reg, memory* mem, uint8_t* opr);
+uint8_t ABY (registers* reg, memory* mem, uint8_t* opr);
+uint8_t IN (registers* reg, memory* mem, uint8_t* opr);
+uint8_t INDX (registers* reg, memory* mem, uint8_t* opr);
+uint8_t INDY (registers* reg, memory* mem, uint8_t* opr);
 
-uint8_t PIRQ (struct registers* reg, struct memory* mem, uint8_t* opr);
-uint8_t PRTS (struct registers* reg, struct memory* mem, uint8_t* opr);
+uint8_t PUSH_BYTE (registers* reg, memory* mem, uint8_t opr);
+uint8_t POP_BYTE (registers* reg, memory* mem, uint8_t* opr);
+uint8_t PUSH_WORD(registers* reg, memory* mem, uint16_t opr);
+uint8_t POP_WORD(registers* reg, memory* mem, uint16_t* opr);
 
-uint8_t JMPB (struct registers* reg, struct memory* mem, uint8_t* opr);
-uint8_t JMPN (struct registers* reg, struct memory* mem, uint8_t* opr);
-uint8_t JMPS (struct registers* reg, struct memory* mem, uint8_t* opr);
+uint8_t PIRQ (registers* reg, memory* mem, uint8_t* opr);
+uint8_t PRTS (registers* reg, memory* mem, uint8_t* opr);
 
-uint8_t PSHP (struct registers* reg, struct memory* mem, uint8_t* opr);
-uint8_t PLLP (struct registers* reg, struct memory* mem, uint8_t* opr);
-uint8_t PSHA (struct registers* reg, struct memory* mem, uint8_t* opr);
-uint8_t PLLA (struct registers* reg, struct memory* mem, uint8_t* opr);
+uint8_t JMPB (registers* reg, memory* mem, uint8_t* opr);
+uint8_t JMPN (registers* reg, memory* mem, uint8_t* opr);
+uint8_t JMPS (registers* reg, memory* mem, uint8_t* opr);
 
-typedef uint8_t (*address_function_ptr) (struct registers*, struct memory*, uint8_t*);
+uint8_t PSHP (registers* reg, memory* mem, uint8_t* opr);
+uint8_t PLLP (registers* reg, memory* mem, uint8_t* opr);
+uint8_t PSHA (registers* reg, memory* mem, uint8_t* opr);
+uint8_t PLLA (registers* reg, memory* mem, uint8_t* opr);
+
+typedef uint8_t (*address_function_ptr) (registers*, memory*, uint8_t*);
 
 static address_function_ptr addressing_modes[0x100] = {
 //     X0    X1    X2    X3    X4    X5    X6    X7    X8    X9    XA    XB    XC    XD    XE    XF

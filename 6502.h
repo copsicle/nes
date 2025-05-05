@@ -3,7 +3,7 @@
 
 #include <stdint.h>
 
-struct registers
+typedef struct
 {
     uint8_t A; // Accumulator
     uint8_t X; // X register
@@ -11,88 +11,88 @@ struct registers
     uint16_t PC; // Program counter
     uint8_t S; // Stack Pointer
     uint8_t P; // Status Register
-};
+} registers;
 
 // Official instructions
-uint8_t ADC (struct registers* reg, uint8_t* opr);
-uint8_t AND (struct registers* reg, uint8_t* opr);
-uint8_t ASL (struct registers* reg, uint8_t* opr);
-uint8_t BCC (struct registers* reg, uint8_t* opr);
-uint8_t BCS (struct registers* reg, uint8_t* opr);
-uint8_t BEQ (struct registers* reg, uint8_t* opr);
-uint8_t BIT (struct registers* reg, uint8_t* opr);
-uint8_t BMI (struct registers* reg, uint8_t* opr);
-uint8_t BNE (struct registers* reg, uint8_t* opr);
-uint8_t BPL (struct registers* reg, uint8_t* opr);
-uint8_t BRK (struct registers* reg, uint8_t* opr);
-uint8_t BVC (struct registers* reg, uint8_t* opr);
-uint8_t BVS (struct registers* reg, uint8_t* opr);
-uint8_t CLC (struct registers* reg, uint8_t* opr);
-uint8_t CLD (struct registers* reg, uint8_t* opr);
-uint8_t CLI (struct registers* reg, uint8_t* opr);
-uint8_t CLV (struct registers* reg, uint8_t* opr);
-uint8_t CMP (struct registers* reg, uint8_t* opr);
-uint8_t CPX (struct registers* reg, uint8_t* opr);
-uint8_t CPY (struct registers* reg, uint8_t* opr);
-uint8_t DEC (struct registers* reg, uint8_t* opr);
-uint8_t DEX (struct registers* reg, uint8_t* opr);
-uint8_t DEY (struct registers* reg, uint8_t* opr);
-uint8_t EOR (struct registers* reg, uint8_t* opr);
-uint8_t INC (struct registers* reg, uint8_t* opr);
-uint8_t INX (struct registers* reg, uint8_t* opr);
-uint8_t INY (struct registers* reg, uint8_t* opr);
-uint8_t JMP (struct registers* reg, uint8_t* opr);
-uint8_t JSR (struct registers* reg, uint8_t* opr);
-uint8_t LDA (struct registers* reg, uint8_t* opr);
-uint8_t LDX (struct registers* reg, uint8_t* opr);
-uint8_t LDY (struct registers* reg, uint8_t* opr);
-uint8_t LSR (struct registers* reg, uint8_t* opr);
-uint8_t NOP (struct registers* reg, uint8_t* opr);
-uint8_t ORA (struct registers* reg, uint8_t* opr);
-uint8_t PHA (struct registers* reg, uint8_t* opr);
-uint8_t PHP (struct registers* reg, uint8_t* opr);
-uint8_t PLA (struct registers* reg, uint8_t* opr);
-uint8_t PLP (struct registers* reg, uint8_t* opr);
-uint8_t ROL (struct registers* reg, uint8_t* opr);
-uint8_t ROR (struct registers* reg, uint8_t* opr);
-uint8_t RTI (struct registers* reg, uint8_t* opr);
-uint8_t RTS (struct registers* reg, uint8_t* opr);
-uint8_t SBC (struct registers* reg, uint8_t* opr);
-uint8_t SEC (struct registers* reg, uint8_t* opr);
-uint8_t SED (struct registers* reg, uint8_t* opr);
-uint8_t SEI (struct registers* reg, uint8_t* opr);
-uint8_t STA (struct registers* reg, uint8_t* opr);
-uint8_t STX (struct registers* reg, uint8_t* opr);
-uint8_t STY (struct registers* reg, uint8_t* opr);
-uint8_t TAX (struct registers* reg, uint8_t* opr);
-uint8_t TAY (struct registers* reg, uint8_t* opr);
-uint8_t TSX (struct registers* reg, uint8_t* opr);
-uint8_t TXA (struct registers* reg, uint8_t* opr);
-uint8_t TXS (struct registers* reg, uint8_t* opr);
-uint8_t TYA (struct registers* reg, uint8_t* opr);
+uint8_t ADC (registers* reg, uint8_t* opr);
+uint8_t AND (registers* reg, uint8_t* opr);
+uint8_t ASL (registers* reg, uint8_t* opr);
+uint8_t BCC (registers* reg, uint8_t* opr);
+uint8_t BCS (registers* reg, uint8_t* opr);
+uint8_t BEQ (registers* reg, uint8_t* opr);
+uint8_t BIT (registers* reg, uint8_t* opr);
+uint8_t BMI (registers* reg, uint8_t* opr);
+uint8_t BNE (registers* reg, uint8_t* opr);
+uint8_t BPL (registers* reg, uint8_t* opr);
+uint8_t BRK (registers* reg, uint8_t* opr);
+uint8_t BVC (registers* reg, uint8_t* opr);
+uint8_t BVS (registers* reg, uint8_t* opr);
+uint8_t CLC (registers* reg, uint8_t* opr);
+uint8_t CLD (registers* reg, uint8_t* opr);
+uint8_t CLI (registers* reg, uint8_t* opr);
+uint8_t CLV (registers* reg, uint8_t* opr);
+uint8_t CMP (registers* reg, uint8_t* opr);
+uint8_t CPX (registers* reg, uint8_t* opr);
+uint8_t CPY (registers* reg, uint8_t* opr);
+uint8_t DEC (registers* reg, uint8_t* opr);
+uint8_t DEX (registers* reg, uint8_t* opr);
+uint8_t DEY (registers* reg, uint8_t* opr);
+uint8_t EOR (registers* reg, uint8_t* opr);
+uint8_t INC (registers* reg, uint8_t* opr);
+uint8_t INX (registers* reg, uint8_t* opr);
+uint8_t INY (registers* reg, uint8_t* opr);
+uint8_t JMP (registers* reg, uint8_t* opr);
+uint8_t JSR (registers* reg, uint8_t* opr);
+uint8_t LDA (registers* reg, uint8_t* opr);
+uint8_t LDX (registers* reg, uint8_t* opr);
+uint8_t LDY (registers* reg, uint8_t* opr);
+uint8_t LSR (registers* reg, uint8_t* opr);
+uint8_t NOP (registers* reg, uint8_t* opr);
+uint8_t ORA (registers* reg, uint8_t* opr);
+uint8_t PHA (registers* reg, uint8_t* opr);
+uint8_t PHP (registers* reg, uint8_t* opr);
+uint8_t PLA (registers* reg, uint8_t* opr);
+uint8_t PLP (registers* reg, uint8_t* opr);
+uint8_t ROL (registers* reg, uint8_t* opr);
+uint8_t ROR (registers* reg, uint8_t* opr);
+uint8_t RTI (registers* reg, uint8_t* opr);
+uint8_t RTS (registers* reg, uint8_t* opr);
+uint8_t SBC (registers* reg, uint8_t* opr);
+uint8_t SEC (registers* reg, uint8_t* opr);
+uint8_t SED (registers* reg, uint8_t* opr);
+uint8_t SEI (registers* reg, uint8_t* opr);
+uint8_t STA (registers* reg, uint8_t* opr);
+uint8_t STX (registers* reg, uint8_t* opr);
+uint8_t STY (registers* reg, uint8_t* opr);
+uint8_t TAX (registers* reg, uint8_t* opr);
+uint8_t TAY (registers* reg, uint8_t* opr);
+uint8_t TSX (registers* reg, uint8_t* opr);
+uint8_t TXA (registers* reg, uint8_t* opr);
+uint8_t TXS (registers* reg, uint8_t* opr);
+uint8_t TYA (registers* reg, uint8_t* opr);
 
 // Unofficial instructions
-uint8_t STP (struct registers* reg, uint8_t* opr);
-uint8_t SLO (struct registers* reg, uint8_t* opr);
-uint8_t RLA (struct registers* reg, uint8_t* opr);
-uint8_t SRE (struct registers* reg, uint8_t* opr);
-uint8_t RRA (struct registers* reg, uint8_t* opr);
-uint8_t ANC (struct registers* reg, uint8_t* opr);
-uint8_t ALR (struct registers* reg, uint8_t* opr);
-uint8_t ARR (struct registers* reg, uint8_t* opr);
-uint8_t SAX (struct registers* reg, uint8_t* opr);
-uint8_t AHX (struct registers* reg, uint8_t* opr);
-uint8_t XAA (struct registers* reg, uint8_t* opr);
-uint8_t TAS (struct registers* reg, uint8_t* opr);
-uint8_t SHX (struct registers* reg, uint8_t* opr);
-uint8_t SHY (struct registers* reg, uint8_t* opr);
-uint8_t LAX (struct registers* reg, uint8_t* opr);
-uint8_t DCP (struct registers* reg, uint8_t* opr);
-uint8_t ISC (struct registers* reg, uint8_t* opr);
-uint8_t LAS (struct registers* reg, uint8_t* opr);
-uint8_t AXS (struct registers* reg, uint8_t* opr);
+uint8_t STP (registers* reg, uint8_t* opr);
+uint8_t SLO (registers* reg, uint8_t* opr);
+uint8_t RLA (registers* reg, uint8_t* opr);
+uint8_t SRE (registers* reg, uint8_t* opr);
+uint8_t RRA (registers* reg, uint8_t* opr);
+uint8_t ANC (registers* reg, uint8_t* opr);
+uint8_t ALR (registers* reg, uint8_t* opr);
+uint8_t ARR (registers* reg, uint8_t* opr);
+uint8_t SAX (registers* reg, uint8_t* opr);
+uint8_t AHX (registers* reg, uint8_t* opr);
+uint8_t XAA (registers* reg, uint8_t* opr);
+uint8_t TAS (registers* reg, uint8_t* opr);
+uint8_t SHX (registers* reg, uint8_t* opr);
+uint8_t SHY (registers* reg, uint8_t* opr);
+uint8_t LAX (registers* reg, uint8_t* opr);
+uint8_t DCP (registers* reg, uint8_t* opr);
+uint8_t ISC (registers* reg, uint8_t* opr);
+uint8_t LAS (registers* reg, uint8_t* opr);
+uint8_t AXS (registers* reg, uint8_t* opr);
 
-typedef uint8_t (*instruction_ptr)(struct registers*, uint8_t*);
+typedef uint8_t (*instruction_ptr)(registers*, uint8_t*);
 
 static instruction_ptr instructions[0x100] = 
 {
