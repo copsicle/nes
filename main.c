@@ -6,19 +6,14 @@
 
 int main(int argc, char *argv[])
 {
-    struct registers* regs;
-    if ( !(regs = (struct registers*) calloc(1, sizeof(struct registers)))) return 1;
-    struct memory* mem;
-    if ( !(mem = (struct memory*) calloc(1, sizeof(struct memory)))) return 1;
-    mem->ZEROPAGE = (uint8_t*) calloc(0x100, 1);
-    mem->STACK = (uint8_t*) calloc(0x100, 1);
-    mem->GENERAL = (uint8_t*) calloc(0x600, 1);
-    if  (
-        ! mem->ZEROPAGE ||
-        ! mem->STACK ||
-        ! mem->GENERAL 
-        )
-        return 1;
+    registers* regs;
+    if ( !(regs = (registers*) calloc(1, sizeof(registers)))) return 1;
+    memory* mem;
+    if ( !(mem = (memory*) calloc(1, sizeof(memory)))) return 1;
+    for (memmap* page = mem->ZEROPAGE; page < (mem + sizeof(memory)); page += sizeof(memmap))
+    {
+        *page 
+    }
 
     uint8_t inst = 0x0A;
     regs->A = 0x80;

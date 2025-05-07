@@ -3,6 +3,11 @@
 #include "6502.h"
 #include "memory.h"
 
+uint8_t* INIT_MEM ()
+{
+    return NULL;
+}
+
 uint8_t READ_MEM_BYTE (uint16_t add, uint8_t off, memory* mem, uint8_t* opr)
 {
     (void) add;

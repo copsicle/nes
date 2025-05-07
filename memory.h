@@ -4,6 +4,9 @@
 #include "6502.h"
 #include <stdint.h>
 
+#define PAGE_SIZE 0x100
+#define PAGE_COUNT (0x10000 / PAGE_SIZE)
+
 typedef struct
 {
     uint16_t start;
@@ -11,7 +14,18 @@ typedef struct
     uint8_t* ptr;
 } memmap;
 
-typedef struct 
+static memmap meme[] = 
+{
+    {0x0000, 0x00FF, NULL},
+    {0x0100, 0x01FF, NULL},
+    {0x0800, 0x0FFF, NULL},
+    {0x2000, 0x2007, NULL},
+    {0x4000, 0x4017, NULL},
+    {0x4018, 0x401F, NULL},
+    {0x4020, 0xFFFF, NULL}
+};
+
+typedef struct
 {
     memmap* ZEROPAGE;
     memmap* STACK;
