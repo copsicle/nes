@@ -1,10 +1,7 @@
-#include <stdint.h>
-#include <stdlib.h>
-#include <stdio.h>
-
-
 #include "6502.h"
 #include "memory.h"
+#include "nes2.h"
+#include "ppu.h"
 
 int main(int argc, char *argv[])
 {

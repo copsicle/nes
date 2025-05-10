@@ -2,7 +2,7 @@
 #define _MEMORY_H
 
 #include "6502.h"
-#include <stdint.h>
+#include <stdlib.h>
 
 #define RAM_SIZE 0x0800
 #define PPU_SIZE 0x0008
@@ -25,6 +25,8 @@ typedef struct
 
 uint8_t INIT_MEM(memory* mem);
 void FREE_MEM(memory* mem);
+
+uint8_t READ_MEM_BYTE (uint16_t add, uint8_t off, memory* mem, uint8_t* opr);
 
 uint8_t IMM (registers* reg, memory* mem, uint8_t* opr);
 uint8_t PTR (registers* reg, memory* mem, uint16_t* ptr);

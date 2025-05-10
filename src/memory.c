@@ -1,6 +1,3 @@
-#include <stdint.h>
-#include <stdlib.h>
-
 #include "6502.h"
 #include "memory.h"
 

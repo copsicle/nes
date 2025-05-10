@@ -1,9 +1,6 @@
 #include "6502.h"
 //#include "memory.h"
 
-#include <stddef.h>
-#include <stdint.h>
-
 /*
 bit - flag
 0 - (C)arry

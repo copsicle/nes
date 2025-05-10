@@ -33,6 +33,7 @@
     "markdown": false,
     "scminput": false
   },
+  "clangd.arguments": ["-header-insertion=never"] ,
   "java.gradle.buildServer.enabled": "off",
   "vsintellicode.java.completionsEnabled": false,
   "java.autobuild.enabled": false
