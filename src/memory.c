@@ -6,8 +6,6 @@
 
 uint8_t INIT_MEM(memory* mem)
 {
-    if (! (mem = (memory*) calloc(1, sizeof(memory))))
-        return 1;
     if (! (mem->RAM = (uint8_t*) calloc(RAM_SIZE, sizeof(uint8_t))))
         return 1;
     if (! (mem->PPU = (uint8_t*) calloc(PPU_SIZE, sizeof(uint8_t))))

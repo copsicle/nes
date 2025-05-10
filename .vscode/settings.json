@@ -20,6 +20,12 @@
       "source": "Git Bash"
     }
   },
+  
+  "[makefile]": {
+    "editor.insertSpaces": false,
+    "editor.detectIndentation": false,
+    "editor.tabSize": 4
+  },
 
   "github.copilot.enable": {
     "*": false,

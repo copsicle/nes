@@ -493,3 +493,138 @@ uint8_t TYA (registers* reg, uint8_t* opr)
     reg->Y = reg->A;
     return 2;
 }
+
+// Unofficial instructions
+
+uint8_t STP (registers* reg, uint8_t* opr)
+{
+    (void) reg;
+    (void) opr;
+    return 0;
+}
+
+uint8_t SLO (registers* reg, uint8_t* opr)
+{
+    (void) reg;
+    (void) opr;
+    return 0;
+}
+
+uint8_t RLA (registers* reg, uint8_t* opr)
+{
+    (void) reg;
+    (void) opr;
+    return 0;
+}
+
+uint8_t SRE (registers* reg, uint8_t* opr)
+{
+    (void) reg;
+    (void) opr;
+    return 0;
+}
+
+uint8_t RRA (registers* reg, uint8_t* opr)
+{
+    (void) reg;
+    (void) opr;
+    return 0;
+}
+
+uint8_t ANC (registers* reg, uint8_t* opr)
+{
+    (void) reg;
+    (void) opr;
+    return 0;
+}
+
+uint8_t ALR (registers* reg, uint8_t* opr)
+{
+    (void) reg;
+    (void) opr;
+    return 0;
+}
+
+uint8_t ARR (registers* reg, uint8_t* opr)
+{
+    (void) reg;
+    (void) opr;
+    return 0;
+}
+
+uint8_t SAX (registers* reg, uint8_t* opr)
+{
+    (void) reg;
+    (void) opr;
+    return 0;
+}
+
+uint8_t AHX (registers* reg, uint8_t* opr)
+{
+    (void) reg;
+    (void) opr;
+    return 0;
+}
+
+uint8_t XAA (registers* reg, uint8_t* opr)
+{
+    (void) reg;
+    (void) opr;
+    return 0;
+}
+
+uint8_t TAS (registers* reg, uint8_t* opr)
+{
+    (void) reg;
+    (void) opr;
+    return 0;
+}
+
+uint8_t SHX (registers* reg, uint8_t* opr)
+{
+    (void) reg;
+    (void) opr;
+    return 0;
+}
+
+uint8_t SHY (registers* reg, uint8_t* opr)
+{
+    (void) reg;
+    (void) opr;
+    return 0;
+}
+
+uint8_t LAX (registers* reg, uint8_t* opr)
+{
+    (void) reg;
+    (void) opr;
+    return 0;
+}
+
+uint8_t DCP (registers* reg, uint8_t* opr)
+{
+    (void) reg;
+    (void) opr;
+    return 0;
+}
+
+uint8_t ISC (registers* reg, uint8_t* opr)
+{
+    (void) reg;
+    (void) opr;
+    return 0;
+}
+
+uint8_t LAS (registers* reg, uint8_t* opr)
+{
+    (void) reg;
+    (void) opr;
+    return 0;
+}
+
+uint8_t AXS (registers* reg, uint8_t* opr)
+{
+    (void) reg;
+    (void) opr;
+    return 0;
+}
