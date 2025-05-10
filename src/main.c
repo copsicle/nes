@@ -16,7 +16,7 @@ int main(int argc, char *argv[])
         return 1;
     if (INIT_MEM(mem)) return 1;
 
-    uint8_t inst = 0x2A;
+    uint8_t inst = 0x6A;
     regs->A = 0x80;
     uint8_t* opr = NULL;
     uint8_t cycles = 0;
@@ -27,6 +27,7 @@ int main(int argc, char *argv[])
     printf("%d %d", regs->A, cycles);
 
     FREE_MEM(mem);
+    free(mem);
     free(regs);
     return 0;
 }

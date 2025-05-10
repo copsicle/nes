@@ -23,7 +23,6 @@ void FREE_MEM(memory* mem)
     free(mem->PPU);
     free(mem->APUIO);
     free(mem->TEST);
-    free(mem);
 }
 
 uint8_t* TRANSLATE_ADD (uint16_t add, memory* mem)
