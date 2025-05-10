@@ -4,37 +4,27 @@
 #include "6502.h"
 #include <stdint.h>
 
-#define PAGE_SIZE 0x100
-#define PAGE_COUNT (0x10000 / PAGE_SIZE)
+#define RAM_SIZE 0x0800
+#define PPU_SIZE 0x0008
+#define APUIO_SIZE 0x0018
+#define TEST_SIZE 0x0008
+#define CART_SIZE 0xBFE0
+#define SPACE_SIZE 0x10000
+
+#define ZP_ADD 0x0000
+#define STACK_ADD 0x0100
 
 typedef struct
 {
-    uint16_t start;
-    uint16_t end;
-    uint8_t* ptr;
-} memmap;
-
-static memmap meme[] = 
-{
-    {0x0000, 0x00FF, NULL},
-    {0x0100, 0x01FF, NULL},
-    {0x0800, 0x0FFF, NULL},
-    {0x2000, 0x2007, NULL},
-    {0x4000, 0x4017, NULL},
-    {0x4018, 0x401F, NULL},
-    {0x4020, 0xFFFF, NULL}
-};
-
-typedef struct
-{
-    memmap* ZEROPAGE;
-    memmap* STACK;
-    memmap* GENERAL;
-    memmap* PPU;
-    memmap* APUIO;
-    memmap* CARTRAM;
-    memmap* CARTROM;
+    uint8_t* RAM;
+    uint8_t* PPU;
+    uint8_t* APUIO;
+    uint8_t* TEST;
+    uint8_t* CART;
 } memory;
+
+uint8_t INIT_MEM(memory* mem);
+void FREE_MEM(memory* mem);
 
 uint8_t IMM (registers* reg, memory* mem, uint8_t* opr);
 uint8_t PTR (registers* reg, memory* mem, uint16_t* ptr);

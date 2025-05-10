@@ -48,9 +48,9 @@ void SET_FLAGS (uint8_t* P, uint8_t mask, uint16_t* wres, uint8_t* opr1, uint8_t
 uint8_t BRANCH_REL (uint16_t* PC, int8_t opr)
 {
     uint16_t add = (*PC) + opr;
-    uint8_t mod = (((*PC) / 0x100) != (add / 0x100));
+    uint8_t cycle = (((*PC) >> 8) != (add >> 8));
     *PC = add;
-    return 2 + mod;
+    return 2 + cycle;
 }
 
 uint8_t ADC (registers* reg, uint8_t* opr)
