@@ -1,6 +1,7 @@
 #ifndef _NES2_H
 #define _NES2_H
 
+#include "memory.h"
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>

@@ -1,5 +1,4 @@
 #include "6502.h"
-//#include "memory.h"
 
 /*
 bit - flag

@@ -1,6 +1,7 @@
 #ifndef _6502_H
 #define _6502_H
 
+#include <stdlib.h>
 #include <stdint.h>
 
 typedef struct

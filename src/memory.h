@@ -1,8 +1,8 @@
 #ifndef _MEMORY_H
 #define _MEMORY_H
 
+#include "mapper.h"
 #include "6502.h"
-#include <stdlib.h>
 
 #define RAM_SIZE 0x0800
 #define PPU_SIZE 0x0008
@@ -20,7 +20,7 @@ typedef struct
     uint8_t* PPU;
     uint8_t* APUIO;
     uint8_t* TEST;
-    uint8_t* CART;
+    maps* CART;
 } memory;
 
 uint8_t INIT_MEM(memory* mem);
