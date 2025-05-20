@@ -1,23 +1,33 @@
+#include "6502.h"
 #include "mapper.h"
+#include "memory.h"
 
-uint8_t ALLOC_ROM (uint8_t*** bankptr, uint8_t** arrptr, uint8_t mapcnt, uint16_t banksize, uint16_t memsize)
+uint8_t ALLOC_ROM (uint8_t*** bankptr, uint8_t** arrptr, memtype* map)
 {
-    *bankptr = (uint8_t**) calloc(mapcnt, sizeof(uint8_t*));
+    *bankptr = (uint8_t**) calloc(map->COUNT, sizeof(uint8_t*));
     if (!*bankptr) return 1;
-    for (uint8_t bank = 0; bank < mapcnt; bank++)
+    for (uint8_t bank = 0; bank < map->COUNT; bank++)
     {
-        (*bankptr)[bank] = (uint8_t*) calloc(banksize, 1);
+        (*bankptr)[bank] = (uint8_t*) calloc(map->SIZE, 1);
         if (!((*bankptr)[bank])) return 1;
     }
     if (arrptr)
     {
-        uint16_t romcnt = memsize / banksize;
+        uint8_t romcnt = (map->END - map->START) / map->SIZE;
         *arrptr = (uint8_t*) calloc(romcnt, 1);
         if (!(*arrptr)) return 1;
         for (uint8_t bank = 0; bank < romcnt; bank++)
             (*arrptr)[bank] = bank;
     }
     return 0;
+}
+
+void FREE_ROM (uint8_t*** bankptr, uint8_t** arrptr, memtype* map)
+{
+    if (*bankptr)
+        for (uint8_t bank = 0; bank < map->COUNT; bank++)
+            free((*bankptr)[bank]);
+    if (arrptr) free(*arrptr);
 }
 /*
 uint8_t ALLOC_PRG (maps* mem, mapper* map)
@@ -49,14 +59,28 @@ uint8_t ALLOC_RAM (maps* mem, mapper* map)
 */
 uint8_t ALLOC_MAPS (maps* mem, mapper* map)
 {
-    if (ALLOC_ROM(&(mem->PRG), &(mem->PRG_BANK), map->PRG_MAP_COUNT, map->PRG_BANK_SIZE, map->PRG_END - map->PRG_START))
+    if (ALLOC_ROM(&(mem->PRG), &(mem->PRG_BANK), &(map->PRG)))
         return 1;
-    if (map->CHR_BANK_SIZE)
-        if (ALLOC_ROM(&(mem->CHR), &(mem->CHR_BANK), map->CHR_MAP_COUNT, map->CHR_BANK_SIZE, map->CHR_END - map->CHR_START))
+    if (map->CHR.COUNT)
+        if (ALLOC_ROM(&(mem->CHR), &(mem->CHR_BANK), &(map->CHR)))
             return 1;
-    if (map->PRG_RAM_EN)
-        if (ALLOC_ROM(&(mem->RAM), NULL, 1, 1, map->PRG_RAM_END - map->PRG_RAM_START))
+    if (map->RAM.COUNT)
+        if (ALLOC_ROM(&(mem->RAM), NULL, &(map->RAM)))
             return 1;
     return 0;
 }
 
+void FREE_MAPS (maps* mem, mapper* map)
+{
+    FREE_ROM(&(mem->PRG), &(mem->PRG_BANK), &(map->PRG));
+    FREE_ROM(&(mem->CHR), &(mem->CHR_BANK), &(map->CHR));
+    FREE_ROM(&(mem->RAM), NULL, &(map->RAM));
+}
+
+uint8_t* CART_ADD (uint16_t add, memory* mem)
+{
+    (void) add;
+    (void) mem;
+
+    return NULL;
+}

@@ -1,7 +1,7 @@
 #ifndef _PPU_H
 #define _PPU_H
 
-#include "memory.h"
+#include <stdint.h>
 
 #define PATTERN_PAGE 0x1000
 #define NAMETABLE_PAGE 0x0400

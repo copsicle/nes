@@ -1,4 +1,4 @@
 InlayHints:
     Designators: false
 CompileFlags:
-    Add: [-Wall]
+    Add: [-Wall, -Wextra, -pedantic]

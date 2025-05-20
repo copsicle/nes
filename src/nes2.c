@@ -1,3 +1,6 @@
+#include "6502.h"
+#include "mapper.h"
+#include "memory.h"
 #include "nes2.h"
 
 uint8_t NES2_HEADER (FILE* rom, nesheader* head)
@@ -61,10 +64,10 @@ uint8_t LOAD_TRAINER (FILE* rom, memory* mem)
     return (fread(ptr, 1, TRAINER_SIZE, rom) != TRAINER_SIZE);
 }
 
-uint8_t LOAD_DATA (FILE* rom, uint8_t*** mem, uint16_t banksize, uint8_t bankcnt)
+uint8_t LOAD_DATA (FILE* rom, uint8_t*** mem, memtype* map)
 {
-    for (uint8_t bank = 0; bank < bankcnt; bank++)
-        if (fread((*mem)[bank], 1, banksize, rom) != banksize)
+    for (uint8_t bank = 0; bank < map->COUNT; bank++)
+        if (fread((*mem)[bank], 1, map->SIZE, rom) != map->SIZE)
             return 1;
     return 0;
 }
@@ -117,9 +120,9 @@ uint8_t LOAD_ROM (FILE* rom, nesheader* head, memory* mem, mapper* map)
 
     if (ALLOC_MAPS(mem->CART, map))
         return 1;
-    if (LOAD_DATA(rom, &(mem->CART->PRG), map->PRG_END - map->PRG_START, map->PRG_MAP_COUNT))
+    if (LOAD_DATA(rom, &(mem->CART->PRG), &(map->PRG)))
         return 1;
-    if (LOAD_DATA(rom, &(mem->CART->CHR), map->CHR_END - map->CHR_START, map->CHR_MAP_COUNT))
+    if (LOAD_DATA(rom, &(mem->CART->CHR), &(map->CHR)))
         return 1;
     
     /*
