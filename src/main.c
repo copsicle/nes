@@ -1,7 +1,9 @@
 #include <stdio.h>
+#include <direct.h>
 #include "6502.h"
 #include "mapper.h"
 #include "memory.h"
+#include "nes2.h"
 
 int main(int argc, char *argv[])
 {
@@ -15,6 +17,15 @@ int main(int argc, char *argv[])
     if (! (mem = (memory*) calloc(1, sizeof(memory))))
         return 1;
     if (INIT_MEM(mem)) return 1;
+
+
+    printf("%s", _getcwd(NULL, 0));
+    FILE* rom = fopen("src/test/test.nes", "rb");
+    if (!rom) return 1;
+    nesheader* head = NULL;
+    if (! (head = (nesheader*) calloc(1, sizeof(nesheader))))
+        return 1;
+    if (LOAD_ROM(rom, head, mem)) return 1;
 
     uint8_t inst = 0x6A;
     regs->A = 0x80;

@@ -12,6 +12,8 @@ uint8_t INIT_MEM(memory* mem)
         return 1;
     if (! (mem->TEST = (uint8_t*) calloc(TEST_SIZE, sizeof(uint8_t))))
         return 1;
+    if (! (mem->CART = (maps*) calloc(1, sizeof(maps))))
+        return 1;
     return 0;
 }
 
@@ -21,6 +23,7 @@ void FREE_MEM(memory* mem)
     free(mem->PPU);
     free(mem->APUIO);
     free(mem->TEST);
+    free(mem->CART);
 }
 
 uint8_t* SEARCH_BANKS (uint8_t** banks ,uint8_t* arr, uint16_t size, uint16_t offadd)

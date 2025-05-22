@@ -13,7 +13,7 @@ uint8_t ALLOC_ROM (uint8_t*** bankptr, uint8_t** arrptr, memtype* map)
     }
     if (arrptr)
     {
-        uint8_t romcnt = (map->END - map->START) / map->SIZE;
+        uint8_t romcnt = (map->END - map->START + 1) / map->SIZE;
         *arrptr = (uint8_t*) calloc(romcnt, 1);
         if (!(*arrptr)) return 1;
         for (uint8_t bank = 0; bank < romcnt; bank++)

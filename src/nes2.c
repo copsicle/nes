@@ -40,7 +40,7 @@ uint8_t INES_HEADER (FILE* rom, nesheader* head)
 
 uint8_t READ_HEADER (FILE* rom, nesheader* head)
 {
-    uint8_t res = fread(head->ID, sizeof(ID_STR) - 1, 1, rom);
+    uint8_t res = fread(head->ID, 1, sizeof(ID_STR) - 1, rom);
     res += fread(&head->PRGROM, 1, 1, rom);
     res += fread(&head->CHRROM, 1, 1, rom);
     uint8_t read = 0;
@@ -50,7 +50,7 @@ uint8_t READ_HEADER (FILE* rom, nesheader* head)
     res += fread(&read, 1, 1, rom);
     head->FLAGS |= read << 4;
     head->MAPPER |= read & 0xF0;
-    if (res != (sizeof(ID_STR) + 4) || strcmp(head->ID, ID_STR))
+    if (res != (sizeof(ID_STR) + 3) || strcmp(head->ID, ID_STR))
         return 1;
     if ((head->FLAGS & 0xC0) == 0x80)
         return NES2_HEADER(rom, head);
@@ -60,7 +60,7 @@ uint8_t READ_HEADER (FILE* rom, nesheader* head)
 uint8_t LOAD_TRAINER (FILE* rom, memory* mem)
 {
     uint8_t* ptr = NULL;
-    READ_MEM_BYTE(TRAINER_ADD, 0, mem, ptr);
+    READ_MEM_BYTE(TRAINER_ADD, 0, mem, &ptr);
     return (fread(ptr, 1, TRAINER_SIZE, rom) != TRAINER_SIZE);
 }
 
@@ -109,20 +109,20 @@ uint8_t LOAD_MISC (FILE* rom)
     return 0;
 }
 */
-uint8_t LOAD_ROM (FILE* rom, nesheader* head, memory* mem, mapper* map)
+uint8_t LOAD_ROM (FILE* rom, nesheader* head, memory* mem)
 {
     if (READ_HEADER(rom, head)) return 1;
     if (head->FLAGS & 0x04)
         if (LOAD_TRAINER(rom, mem))
             return 1;
     
-    // TODO: CHOOSE MAPPER HERE
+    mem->MAP = &(suppprted_mappers[head->MAPPER & 0x0FFF]);
 
-    if (ALLOC_MAPS(mem->CART, map))
+    if (ALLOC_MAPS(mem->CART, mem->MAP))
         return 1;
-    if (LOAD_DATA(rom, &(mem->CART->PRG), &(map->PRG)))
+    if (LOAD_DATA(rom, &(mem->CART->PRG), &(mem->MAP->PRG)))
         return 1;
-    if (LOAD_DATA(rom, &(mem->CART->CHR), &(map->CHR)))
+    if (LOAD_DATA(rom, &(mem->CART->CHR), &(mem->MAP->CHR)))
         return 1;
     
     /*

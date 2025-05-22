@@ -1,8 +1,15 @@
 { 
   "terminal.integrated.profiles.windows": {
-    "MSYS2": {
-      "path": "C:\\Apps\\msys2\\ucrt64\\bin\\bash.exe",
-      "args": ["--login"]
+    "MSYS2 UCRT64 Bash": {
+      "path": "C:/Apps/msys2/usr/bin/env.exe",
+      "args": [
+        "MSYSTEM=UCRT64",
+        "C:/Apps/msys2/usr/bin/bash.exe",
+        "--login", "-i"
+      ],
+      "env": {
+        "VSCODE_CWD": "${workspaceFolder}"
+      }
     },
     "PowerShell": {
       "source": "PowerShell",
@@ -21,6 +28,9 @@
     }
   },
   
+  "terminal.integrated.defaultProfile.windows": "MSYS2 UCRT64 Bash",
+  "terminal.integrated.cwd": "${workspaceFolder}",
+
   "[makefile]": {
     "editor.insertSpaces": false,
     "editor.detectIndentation": false,
