@@ -4,17 +4,15 @@
 
 void LOOP (registers* reg, memory* mem, cartridge* cart)
 {
-    uint8_t* opr;
-    uint8_t cycle;
+    uint8_t* opr = NULL;
+    uint8_t cycle = JMPB(reg, mem, cart, &opr);
     operation memptr;
     instruction insptr;
     //struct timespec t1, t2;
+
     while (1)
     {
         //timespec_get(&t1, TIME_UTC);
-        
-        opr = NULL;
-        cycle = 0;
         
         cycle += IMM(reg, mem, cart, &opr);
         memptr = operation_table[*opr];
@@ -23,8 +21,10 @@ void LOOP (registers* reg, memory* mem, cartridge* cart)
         if (insptr) cycle += insptr(reg, opr);
 
         //timespec_get(&t2, TIME_UTC);
-            
         //Sleep(roundl(((reg->C * cycle) - (t2.tv_nsec - t1.tv_nsec)) / 1000.0));
+    
+        opr = NULL;
+        cycle = 0;
     }
 }
 

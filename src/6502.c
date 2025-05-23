@@ -17,7 +17,7 @@ void RESET_CPU (registers* reg)
 {
     reg->PC = 0xFFFC;
     reg->S -= 3;
-    reg->P |= 0x20;
+    reg->P |= 0x24;
 }
 
 void SET_FLAGS (uint8_t* P, uint8_t mask, uint16_t* wres, uint8_t* opr1, uint8_t* opr2)

@@ -26,6 +26,7 @@ uint8_t INIT_MEM(memory* mem);
 void FREE_MEM(memory* mem);
 
 uint8_t READ_MEM_BYTE (uint16_t add, uint8_t off, memory* mem, cartridge* cart, uint8_t** opr);
+uint8_t JMPB (registers* reg, memory* mem, cartridge* cart, uint8_t** opr);
 uint8_t IMM (registers* reg, memory* mem, cartridge* cart, uint8_t** opr);
 
 typedef uint8_t (*operation) (registers*, memory*, cartridge*, uint8_t**);

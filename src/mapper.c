@@ -12,11 +12,11 @@ uint8_t* SEARCH_BANKS (uint8_t** banks ,uint8_t* arr, uint16_t size, uint16_t of
 
 uint8_t* TRANSLATE_MAP (uint16_t add, cartridge* cart)
 {
-    if (add >= cart->MAP->RAM.START && add < cart->MAP->RAM.END)
+    if (add >= cart->MAP->RAM.START && add <= cart->MAP->RAM.END)
         return *(cart->RAM) + (add % cart->MAP->RAM.SIZE);
-    else if (add >= cart->MAP->PRG.START && add < cart->MAP->PRG.END)
+    else if (add >= cart->MAP->PRG.START && add <= cart->MAP->PRG.END)
         return SEARCH_BANKS(cart->PRG, cart->PRG_BANK, cart->MAP->PRG.SIZE, add - cart->MAP->PRG.START);
-    else if (add >= cart->MAP->CHR.START && add < cart->MAP->CHR.END)
+    else if (add >= cart->MAP->CHR.START && add <= cart->MAP->CHR.END)
         return SEARCH_BANKS(cart->CHR, cart->CHR_BANK, cart->MAP->CHR.SIZE, add - cart->MAP->CHR.START);
     return NULL;
 }
