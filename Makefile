@@ -1,5 +1,5 @@
 CC = x86_64-w64-mingw32-gcc
-CFLAGS = -g -Wall
+CFLAGS = -g -Wall -Wextra -pedantic
 
 SRC_DIR = src
 BUILD_DIR = build

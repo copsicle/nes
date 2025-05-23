@@ -1,6 +1,4 @@
 /.vscode
-/.vscode/*
 /build
-/build/*
 .clangd
-/src/test
+/roms

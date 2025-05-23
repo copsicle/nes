@@ -1,44 +1,55 @@
-#include <stdio.h>
-#include <direct.h>
-#include "6502.h"
-#include "mapper.h"
-#include "memory.h"
+//#include <time.h>
+//#include <windows.h>
 #include "nes2.h"
 
-int main(int argc, char *argv[])
+void LOOP (registers* reg, memory* mem, cartridge* cart)
+{
+    uint8_t* opr;
+    uint8_t cycle;
+    operation memptr;
+    instruction insptr;
+    //struct timespec t1, t2;
+    while (1)
+    {
+        //timespec_get(&t1, TIME_UTC);
+        
+        opr = NULL;
+        cycle = 0;
+        
+        cycle += IMM(reg, mem, cart, &opr);
+        memptr = operation_table[*opr];
+        insptr = instruction_table[*opr];
+        if (memptr) cycle += memptr(reg, mem, cart, &opr);
+        if (insptr) cycle += insptr(reg, opr);
+
+        //timespec_get(&t2, TIME_UTC);
+            
+        //Sleep(roundl(((reg->C * cycle) - (t2.tv_nsec - t1.tv_nsec)) / 1000.0));
+    }
+}
+
+int main (int argc, char *argv[])
 {
     (void) argc;
     (void) argv;
-
-    registers* regs = NULL;
-    if (! (regs = (registers*) calloc(1, sizeof(registers))))
-        return 1;
-    memory* mem = NULL;
-    if (! (mem = (memory*) calloc(1, sizeof(memory))))
-        return 1;
-    if (INIT_MEM(mem)) return 1;
-
-
-    printf("%s", _getcwd(NULL, 0));
-    FILE* rom = fopen("src/test/test.nes", "rb");
-    if (!rom) return 1;
-    nesheader* head = NULL;
-    if (! (head = (nesheader*) calloc(1, sizeof(nesheader))))
-        return 1;
-    if (LOAD_ROM(rom, head, mem)) return 1;
-
-    uint8_t inst = 0x6A;
-    regs->A = 0x80;
-    uint8_t* opr = NULL;
-    uint8_t cycles = 0;
-    address_function_ptr ptr = addressing_modes[inst];
-    if (ptr) cycles += ptr(regs, mem, &opr);
-    cycles += instructions[inst](regs, opr);
     
-    printf("%d %d", regs->A, cycles);
+    registers reg = {0};
+    RESET_CPU(&reg);
+    memory mem = {0};
+    if (INIT_MEM(&mem)) return 1;
 
-    FREE_MEM(mem);
-    free(mem);
-    free(regs);
+    FILE* rom = fopen("roms/test.nes", "rb");
+    if (!rom) return 1;
+    nesheader head = {0};
+    cartridge cart = {0};
+    if (LOAD_ROM(rom, &head, &mem, &cart))
+        return 1;
+    if (head.TIMING == 1) reg.C = PAL_CYCLE;
+    else reg.C = NTSC_CYCLE;
+
+    LOOP(&reg, &mem, &cart);
+
+    FREE_MEM(&mem);
+    fclose(rom);
     return 0;
 }

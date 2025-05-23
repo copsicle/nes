@@ -1,6 +1,3 @@
-#include "6502.h"
-#include "mapper.h"
-#include "memory.h"
 #include "nes2.h"
 
 uint8_t NES2_HEADER (FILE* rom, nesheader* head)
@@ -57,14 +54,14 @@ uint8_t READ_HEADER (FILE* rom, nesheader* head)
     return INES_HEADER(rom, head);
 }
 
-uint8_t LOAD_TRAINER (FILE* rom, memory* mem)
+uint8_t LOAD_TRAINER (FILE* rom, memory* mem, cartridge* cart)
 {
     uint8_t* ptr = NULL;
-    READ_MEM_BYTE(TRAINER_ADD, 0, mem, &ptr);
+    READ_MEM_BYTE(TRAINER_ADD, 0, mem, cart, &ptr);
     return (fread(ptr, 1, TRAINER_SIZE, rom) != TRAINER_SIZE);
 }
 
-uint8_t LOAD_DATA (FILE* rom, uint8_t*** mem, memtype* map)
+uint8_t LOAD_DATA (FILE* rom, uint8_t*** mem, const memtype* map)
 {
     for (uint8_t bank = 0; bank < map->COUNT; bank++)
         if (fread((*mem)[bank], 1, map->SIZE, rom) != map->SIZE)
@@ -109,20 +106,20 @@ uint8_t LOAD_MISC (FILE* rom)
     return 0;
 }
 */
-uint8_t LOAD_ROM (FILE* rom, nesheader* head, memory* mem)
+uint8_t LOAD_ROM (FILE* rom, nesheader* head, memory* mem, cartridge* cart)
 {
     if (READ_HEADER(rom, head)) return 1;
     if (head->FLAGS & 0x04)
-        if (LOAD_TRAINER(rom, mem))
+        if (LOAD_TRAINER(rom, mem, cart))
             return 1;
     
-    mem->MAP = &(suppprted_mappers[head->MAPPER & 0x0FFF]);
+    cart->MAP = &(mapper_table[head->MAPPER & 0x0FFF]);
 
-    if (ALLOC_MAPS(mem->CART, mem->MAP))
+    if (ALLOC_MAPS(cart))
         return 1;
-    if (LOAD_DATA(rom, &(mem->CART->PRG), &(mem->MAP->PRG)))
+    if (LOAD_DATA(rom, &(cart->PRG), &(cart->MAP->PRG)))
         return 1;
-    if (LOAD_DATA(rom, &(mem->CART->CHR), &(mem->MAP->CHR)))
+    if (LOAD_DATA(rom, &(cart->CHR), &(cart->MAP->CHR)))
         return 1;
     
     /*

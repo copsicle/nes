@@ -12,7 +12,7 @@
 #define PRG_UNITS 0x4000
 #define CHR_UNITS 0x2000
 
-struct memory;
+#include "memory.h"
 
 typedef struct 
 {
@@ -29,6 +29,6 @@ typedef struct
     uint8_t DEFEXP;
 } nesheader;
 
-uint8_t LOAD_ROM (FILE* rom, nesheader* head, memory* mem);
+uint8_t LOAD_ROM (FILE* rom, nesheader* head, memory* mem, cartridge* cart);
 
 #endif

@@ -33,28 +33,12 @@ typedef struct
     uint8_t** RAM;
     uint8_t* PRG_BANK;
     uint8_t* CHR_BANK;
-} maps;
+    const mapper* MAP;
+} cartridge;
 
-uint8_t ALLOC_MAPS (maps* mem, mapper* map);
+uint8_t ALLOC_MAPS (cartridge* cart);
+uint8_t* TRANSLATE_MAP (uint16_t add, cartridge* cart);
 
-static mapper suppprted_mappers[0x1000] = {
-    [0] = {{0x8000, 0xFFFF, 0x8000, 1}, {0x0000, 0x1FFF, 0x2000, 1}, {0,0,0,0}, {0,0,0,0}, {0,0,0,0}, {0,0,0,0}},
-    [1] = {{0x8000, 0xFFFF, 0x4000, 20}, {0x0000, 0x1FFF, 0x1000, 32}, {0x6000, 0x7FFF, 0x2000, 1}, {0,0,0,0}, {0,0,0,0}, {0,0,0,0}},
-    /*
-    [2] = {},
-    [3] = {},
-    [4] = {},
-    [5] = {},
-    [7] = {},
-    [9] = {},
-    [11] = {},
-    [12] = {},
-    [14] = {},
-    [34] = {},
-    [66] = {},
-    [69] = {},
-    [71] = {},
-    */
-    };
+extern const mapper mapper_table[0x1000];
 
 #endif
