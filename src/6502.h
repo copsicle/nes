@@ -20,8 +20,8 @@ typedef struct
     uint16_t C; // Not a register, rather the clock freq
 } registers;
 
-void RESET_CPU (registers* reg);
-void PRINT_CPU (registers* reg);
+void RESET_CPU (registers *reg);
+void PRINT_CPU (registers *reg);
 
 typedef uint8_t (*instruction)(registers*, uint8_t*);
 

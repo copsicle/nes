@@ -29,6 +29,6 @@ typedef struct
     uint8_t DEFEXP;
 } nesheader;
 
-uint8_t LOAD_ROM (FILE* rom, nesheader* head, memory* mem, cartridge* cart);
+uint8_t LOAD_ROM (FILE *rom, nesheader *head, memory *mem, cartridge *cart);
 
 #endif

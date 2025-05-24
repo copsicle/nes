@@ -13,14 +13,14 @@ bit - flag
 7 - (N)egative
 */
 
-void RESET_CPU (registers* reg)
+void RESET_CPU (registers *reg)
 {
     reg->PC = 0xFFFC;
     reg->S -= 3;
     reg->P |= 0x24;
 }
 
-void PRINT_CPU (registers* reg)
+void PRINT_CPU (registers *reg)
 {
     printf("CPU Dump:\n");
     printf("PC: 0x%04X | ", reg->PC);
@@ -31,7 +31,7 @@ void PRINT_CPU (registers* reg)
     printf("FLAGS: 0x%02X\n", reg->P);
 }
 
-void SET_FLAGS (uint8_t* P, uint8_t mask, uint16_t* wres, uint8_t* opr1, uint8_t* opr2)
+void SET_FLAGS (uint8_t *P, uint8_t mask, uint16_t *wres, uint8_t *opr1, uint8_t *opr2)
 {
     // This helper function sets commonly used flags utilizing either 16 or 8 bit integers
     // The mask is the bits the particular function wishes to set
@@ -59,7 +59,7 @@ void SET_FLAGS (uint8_t* P, uint8_t mask, uint16_t* wres, uint8_t* opr1, uint8_t
     }
 }
 
-uint8_t BRANCH_REL (uint16_t* PC, int8_t opr)
+uint8_t BRANCH_REL (uint16_t *PC, int8_t opr)
 {
     uint16_t add = (*PC) + opr;
     uint8_t cycle = (((*PC) >> 8) != (add >> 8));
@@ -67,7 +67,7 @@ uint8_t BRANCH_REL (uint16_t* PC, int8_t opr)
     return 1 + cycle;
 }
 
-uint8_t ADC (registers* reg, uint8_t* opr)
+uint8_t ADC (registers *reg, uint8_t *opr)
 {
     uint16_t result = reg->A + *opr + (reg->P & 0x01);
     SET_FLAGS(&(reg->P), 0xC3, &result, &(reg->A), opr);
@@ -76,7 +76,7 @@ uint8_t ADC (registers* reg, uint8_t* opr)
     return 1;
 }
 
-uint8_t AND (registers* reg, uint8_t* opr)
+uint8_t AND (registers *reg, uint8_t *opr)
 {
     uint8_t result = reg->A & *opr;
     SET_FLAGS(&(reg->P), 0x82, NULL, &result, NULL);
@@ -84,10 +84,10 @@ uint8_t AND (registers* reg, uint8_t* opr)
     return 1;
 }
 
-uint8_t ASL (registers* reg, uint8_t* opr)
+uint8_t ASL (registers *reg, uint8_t *opr)
 {
     // THIS IS A DUMMY WRITING FUNCTION WHICH MIGHT NEED TIMING FIXES
-    uint8_t* ptr = NULL;
+    uint8_t *ptr = NULL;
     if (opr) ptr = opr;
     else ptr = &(reg->A);
 
@@ -98,55 +98,55 @@ uint8_t ASL (registers* reg, uint8_t* opr)
     return 2;
 }
 
-uint8_t BCC (registers* reg, uint8_t* opr)
+uint8_t BCC (registers *reg, uint8_t *opr)
 {
     if (!(reg->P & 0x01))
         return BRANCH_REL(&(reg->PC), (int8_t)*opr);
     return 1;
 }
 
-uint8_t BCS (registers* reg, uint8_t* opr)
+uint8_t BCS (registers *reg, uint8_t *opr)
 {
     if (reg->P & 0x01)
         return BRANCH_REL(&(reg->PC), (int8_t)*opr);
     return 1;
 }
 
-uint8_t BEQ (registers* reg, uint8_t* opr)
+uint8_t BEQ (registers *reg, uint8_t *opr)
 {
     if (reg->P & 0x02)
         return BRANCH_REL(&(reg->PC), (int8_t)*opr);
     return 1;
 }
 
-uint8_t BIT (registers* reg, uint8_t* opr)
+uint8_t BIT (registers *reg, uint8_t *opr)
 {
     SET_FLAGS(&(reg->P), 0xC2, NULL, opr, NULL);
     return 1;
 }
 
-uint8_t BMI (registers* reg, uint8_t* opr)
+uint8_t BMI (registers *reg, uint8_t *opr)
 {
     if (reg->P & 0x80)
         return BRANCH_REL(&(reg->PC), (int8_t)*opr);
     return 1;
 }
 
-uint8_t BNE (registers* reg, uint8_t* opr)
+uint8_t BNE (registers *reg, uint8_t *opr)
 {
     if (!(reg->P & 0x02))
         return BRANCH_REL(&(reg->PC), (int8_t)*opr);
     return 1;
 }
 
-uint8_t BPL (registers* reg, uint8_t* opr)
+uint8_t BPL (registers *reg, uint8_t *opr)
 {
     if (!(reg->P & 0x80))
         return BRANCH_REL(&(reg->PC), (int8_t)*opr);
     return 1;
 }
 
-uint8_t BRK (registers* reg, uint8_t* opr)
+uint8_t BRK (registers *reg, uint8_t *opr)
 {
     (void) opr;
     reg->P |= 0x04;
@@ -154,35 +154,35 @@ uint8_t BRK (registers* reg, uint8_t* opr)
     return 3;
 }
 
-uint8_t BVC (registers* reg, uint8_t* opr)
+uint8_t BVC (registers *reg, uint8_t *opr)
 {
     if (!(reg->P & 0x40))
         return BRANCH_REL(&(reg->PC), (int8_t)*opr);
     return 1;
 }
 
-uint8_t BVS (registers* reg, uint8_t* opr)
+uint8_t BVS (registers *reg, uint8_t *opr)
 {
     if (reg->P & 0x40)
         return BRANCH_REL(&(reg->PC), (int8_t)*opr);
     return 1;
 }
 
-uint8_t CLC (registers* reg, uint8_t* opr)
+uint8_t CLC (registers *reg, uint8_t *opr)
 {
     (void) opr;
     reg->P &= ~(0x01);
     return 2;
 }
 
-uint8_t CLD (registers* reg, uint8_t* opr)
+uint8_t CLD (registers *reg, uint8_t *opr)
 {
     (void) opr;
     reg->P &= ~(0x08);
     return 2;
 }
 
-uint8_t CLI (registers* reg, uint8_t* opr)
+uint8_t CLI (registers *reg, uint8_t *opr)
 {
     // CLEARING THIS FLAG IS DELAYED BY ONE INSTRUCTION
     // MIGHT NEED TO FIX THE TIMING
@@ -191,34 +191,34 @@ uint8_t CLI (registers* reg, uint8_t* opr)
     return 2;
 }
 
-uint8_t CLV (registers* reg, uint8_t* opr)
+uint8_t CLV (registers *reg, uint8_t *opr)
 {
     (void) opr;
     reg->P &= ~(0x40);
     return 2;
 }
 
-uint8_t CMP (registers* reg, uint8_t* opr)
+uint8_t CMP (registers *reg, uint8_t *opr)
 {
     uint8_t sub = reg->A - *opr;
     SET_FLAGS(&(reg->P), 0x83, NULL, &sub, NULL);
     return 1;
 }
-uint8_t CPX (registers* reg, uint8_t* opr)
+uint8_t CPX (registers *reg, uint8_t *opr)
 {
     uint8_t sub = reg->X - *opr;
     SET_FLAGS(&(reg->P), 0x83, NULL, &sub, NULL);
     return 1;
 }
 
-uint8_t CPY (registers* reg, uint8_t* opr)
+uint8_t CPY (registers *reg, uint8_t *opr)
 {
     uint8_t sub = reg->Y - *opr;
     SET_FLAGS(&(reg->P), 0x83, NULL, &sub, NULL);
     return 1;
 }
 
-uint8_t DEC (registers* reg, uint8_t* opr)
+uint8_t DEC (registers *reg, uint8_t *opr)
 {
     // THIS IS A DUMMY WRITING FUNCTION WHICH MIGHT NEED TIMING FIXES
     (*opr)--;
@@ -226,7 +226,7 @@ uint8_t DEC (registers* reg, uint8_t* opr)
     return 2;
 }
 
-uint8_t DEX (registers* reg, uint8_t* opr)
+uint8_t DEX (registers *reg, uint8_t *opr)
 {
     (void) opr;
     (reg->X)--;
@@ -234,7 +234,7 @@ uint8_t DEX (registers* reg, uint8_t* opr)
     return 2;
 }
 
-uint8_t DEY (registers* reg, uint8_t* opr)
+uint8_t DEY (registers *reg, uint8_t *opr)
 {
     (void) opr;
     (reg->Y)--;
@@ -242,7 +242,7 @@ uint8_t DEY (registers* reg, uint8_t* opr)
     return 2;
 }
 
-uint8_t EOR (registers* reg, uint8_t* opr)
+uint8_t EOR (registers *reg, uint8_t *opr)
 {
     uint8_t result = reg->A ^ *opr;
     SET_FLAGS(&(reg->P), 0x82, NULL, &result, NULL);
@@ -250,7 +250,7 @@ uint8_t EOR (registers* reg, uint8_t* opr)
     return 1;
 }
 
-uint8_t INC (registers* reg, uint8_t* opr)
+uint8_t INC (registers *reg, uint8_t *opr)
 {
     // THIS IS A DUMMY WRITING FUNCTION WHICH MIGHT NEED TIMING FIXES
     (*opr)++;
@@ -258,7 +258,7 @@ uint8_t INC (registers* reg, uint8_t* opr)
     return 2;
 }
 
-uint8_t INX (registers* reg, uint8_t* opr)
+uint8_t INX (registers *reg, uint8_t *opr)
 {
     (void) opr;
     (reg->X)++;
@@ -266,7 +266,7 @@ uint8_t INX (registers* reg, uint8_t* opr)
     return 2;
 }
 
-uint8_t INY (registers* reg, uint8_t* opr)
+uint8_t INY (registers *reg, uint8_t *opr)
 {
     (void) opr;
     (reg->Y)++;
@@ -274,35 +274,35 @@ uint8_t INY (registers* reg, uint8_t* opr)
     return 2;
 }
 
-uint8_t JMP (registers* reg, uint8_t* opr)
+uint8_t JMP (registers *reg, uint8_t *opr)
 {
     (void) reg;
     (void) opr;
     return 1;
 }
 
-uint8_t JSR (registers* reg, uint8_t* opr)
+uint8_t JSR (registers *reg, uint8_t *opr)
 {
     (void) reg;
     (void) opr;
     return 1;
 }
 
-uint8_t LDA (registers* reg, uint8_t* opr)
+uint8_t LDA (registers *reg, uint8_t *opr)
 {
     SET_FLAGS(&(reg->P), 0x82, NULL, opr, NULL);
     reg->A = *opr;
     return 1;
 }
 
-uint8_t LDX (registers* reg, uint8_t* opr)
+uint8_t LDX (registers *reg, uint8_t *opr)
 {
     SET_FLAGS(&(reg->P), 0x82, NULL, opr, NULL);
     reg->X = *opr;
     return 1;
 }
 
-uint8_t LDY (registers* reg, uint8_t* opr)
+uint8_t LDY (registers *reg, uint8_t *opr)
 {
     SET_FLAGS(&(reg->P), 0x82, NULL, opr, NULL);
     reg->Y = *opr;
@@ -312,7 +312,7 @@ uint8_t LDY (registers* reg, uint8_t* opr)
 uint8_t LSR (registers *reg, uint8_t *opr)
 {
     // THIS IS A DUMMY WRITING FUNCTION WHICH MIGHT NEED TIMING FIXES
-    uint8_t* ptr = NULL;
+    uint8_t *ptr = NULL;
     if (opr) ptr = opr;
     else ptr = &(reg->A);
 
@@ -323,14 +323,14 @@ uint8_t LSR (registers *reg, uint8_t *opr)
     return 2;
 }
 
-uint8_t NOP (registers* reg, uint8_t* opr)
+uint8_t NOP (registers *reg, uint8_t *opr)
 {
     (void) reg;
     (void) opr;
     return 2;
 }
 
-uint8_t ORA (registers* reg, uint8_t* opr)
+uint8_t ORA (registers *reg, uint8_t *opr)
 {
     uint8_t result = reg->A | *opr;
     SET_FLAGS(&(reg->P), 0x82, NULL, &result, NULL);
@@ -338,28 +338,28 @@ uint8_t ORA (registers* reg, uint8_t* opr)
     return 1;
 }
 
-uint8_t PHA (registers* reg, uint8_t* opr)
+uint8_t PHA (registers *reg, uint8_t *opr)
 {
     (void) reg;
     (void) opr;
     return 1;
 }
 
-uint8_t PHP (registers* reg, uint8_t* opr)
+uint8_t PHP (registers *reg, uint8_t *opr)
 {
     (void) reg;
     (void) opr;
     return 1;
 }
 
-uint8_t PLA (registers* reg, uint8_t* opr)
+uint8_t PLA (registers *reg, uint8_t *opr)
 {
     (void) reg;
     (void) opr;
     return 1;
 }
 
-uint8_t PLP (registers* reg, uint8_t* opr)
+uint8_t PLP (registers *reg, uint8_t *opr)
 {
     // CLEARING THIS FLAG IS DELAYED BY ONE INSTRUCTION
     // MIGHT NEED TO FIX THE TIMING
@@ -368,10 +368,10 @@ uint8_t PLP (registers* reg, uint8_t* opr)
     return 1;
 }
 
-uint8_t ROL (registers* reg, uint8_t* opr)
+uint8_t ROL (registers *reg, uint8_t *opr)
 {
     // THIS IS A DUMMY WRITING FUNCTION WHICH MIGHT NEED TIMING FIXES
-    uint8_t* ptr = NULL;
+    uint8_t *ptr = NULL;
     if (opr) ptr = opr;
     else ptr = &(reg->A);
 
@@ -382,10 +382,10 @@ uint8_t ROL (registers* reg, uint8_t* opr)
 
     return 2;
 }
-uint8_t ROR (registers* reg, uint8_t* opr)
+uint8_t ROR (registers *reg, uint8_t *opr)
 {
     // THIS IS A DUMMY WRITING FUNCTION WHICH MIGHT NEED TIMING FIXES
-    uint8_t* ptr = NULL;
+    uint8_t *ptr = NULL;
     if (opr) ptr = opr;
     else ptr = &(reg->A);
 
@@ -397,7 +397,7 @@ uint8_t ROR (registers* reg, uint8_t* opr)
     return 2;
 }
 
-uint8_t RTI (registers* reg, uint8_t* opr)
+uint8_t RTI (registers *reg, uint8_t *opr)
 {
     // CLEARING THIS FLAG IS DELAYED BY ONE INSTRUCTION
     // MIGHT NEED TO FIX THE TIMING
@@ -406,34 +406,34 @@ uint8_t RTI (registers* reg, uint8_t* opr)
     return 1;
 }
 
-uint8_t RTS (registers* reg, uint8_t* opr)
+uint8_t RTS (registers *reg, uint8_t *opr)
 {
     (void) reg;
     (void) opr;
     return 1;
 }
 
-uint8_t SBC (registers* reg, uint8_t* opr)
+uint8_t SBC (registers *reg, uint8_t *opr)
 {
     uint8_t tmp = ~(*opr);
     return ADC(reg, &tmp);
 }
 
-uint8_t SEC (registers* reg, uint8_t* opr)
+uint8_t SEC (registers *reg, uint8_t *opr)
 {
     (void) opr;
     reg->P |= 0x01;
     return 2;
 }
 
-uint8_t SED (registers* reg, uint8_t* opr)
+uint8_t SED (registers *reg, uint8_t *opr)
 {
     (void) opr;
     reg->P |= 0x08;
     return 2;
 }
 
-uint8_t SEI (registers* reg, uint8_t* opr)
+uint8_t SEI (registers *reg, uint8_t *opr)
 {
     // CLEARING THIS FLAG IS DELAYED BY ONE INSTRUCTION
     // MIGHT NEED TO FIX THE TIMING
@@ -442,25 +442,25 @@ uint8_t SEI (registers* reg, uint8_t* opr)
     return 2;
 }
 
-uint8_t STA (registers* reg, uint8_t* opr)
+uint8_t STA (registers *reg, uint8_t *opr)
 {
     *opr = reg->A;
     return 1;
 }
 
-uint8_t STX (registers* reg, uint8_t* opr)
+uint8_t STX (registers *reg, uint8_t *opr)
 {
     *opr = reg->X;
     return 1;
 }
 
-uint8_t STY (registers* reg, uint8_t* opr)
+uint8_t STY (registers *reg, uint8_t *opr)
 {
     *opr = reg->Y;
     return 1;
 }
 
-uint8_t TAX (registers* reg, uint8_t* opr)
+uint8_t TAX (registers *reg, uint8_t *opr)
 {
     (void) opr;
     SET_FLAGS(&(reg->P), 0x82, NULL, &(reg->A), NULL);
@@ -468,7 +468,7 @@ uint8_t TAX (registers* reg, uint8_t* opr)
     return 2;
 }
 
-uint8_t TAY (registers* reg, uint8_t* opr)
+uint8_t TAY (registers *reg, uint8_t *opr)
 {
     (void) opr;
     SET_FLAGS(&(reg->P), 0x82, NULL, &(reg->A), NULL);
@@ -476,7 +476,7 @@ uint8_t TAY (registers* reg, uint8_t* opr)
     return 2;
 }
 
-uint8_t TSX (registers* reg, uint8_t* opr)
+uint8_t TSX (registers *reg, uint8_t *opr)
 {
     (void) opr;
     SET_FLAGS(&(reg->P), 0x82, NULL, &(reg->S), NULL);
@@ -484,7 +484,7 @@ uint8_t TSX (registers* reg, uint8_t* opr)
     return 2;
 }
 
-uint8_t TXA (registers* reg, uint8_t* opr)
+uint8_t TXA (registers *reg, uint8_t *opr)
 {
     (void) opr;
     SET_FLAGS(&(reg->P), 0x82, NULL, &(reg->X), NULL);
@@ -492,7 +492,7 @@ uint8_t TXA (registers* reg, uint8_t* opr)
     return 2;
 }
 
-uint8_t TXS (registers* reg, uint8_t* opr)
+uint8_t TXS (registers *reg, uint8_t *opr)
 {
     (void) opr;
     SET_FLAGS(&(reg->P), 0x82, NULL, &(reg->X), NULL);
@@ -500,7 +500,7 @@ uint8_t TXS (registers* reg, uint8_t* opr)
     return 2;
 }
 
-uint8_t TYA (registers* reg, uint8_t* opr)
+uint8_t TYA (registers *reg, uint8_t *opr)
 {
     (void) opr;
     SET_FLAGS(&(reg->P), 0x82, NULL, &(reg->A), NULL);
@@ -510,133 +510,133 @@ uint8_t TYA (registers* reg, uint8_t* opr)
 
 // Unofficial instructions
 
-uint8_t STP (registers* reg, uint8_t* opr)
+uint8_t STP (registers *reg, uint8_t *opr)
 {
     (void) reg;
     (void) opr;
     return 0;
 }
 
-uint8_t SLO (registers* reg, uint8_t* opr)
+uint8_t SLO (registers *reg, uint8_t *opr)
 {
     (void) reg;
     (void) opr;
     return 0;
 }
 
-uint8_t RLA (registers* reg, uint8_t* opr)
+uint8_t RLA (registers *reg, uint8_t *opr)
 {
     (void) reg;
     (void) opr;
     return 0;
 }
 
-uint8_t SRE (registers* reg, uint8_t* opr)
+uint8_t SRE (registers *reg, uint8_t *opr)
 {
     (void) reg;
     (void) opr;
     return 0;
 }
 
-uint8_t RRA (registers* reg, uint8_t* opr)
+uint8_t RRA (registers *reg, uint8_t *opr)
 {
     (void) reg;
     (void) opr;
     return 0;
 }
 
-uint8_t ANC (registers* reg, uint8_t* opr)
+uint8_t ANC (registers *reg, uint8_t *opr)
 {
     (void) reg;
     (void) opr;
     return 0;
 }
 
-uint8_t ALR (registers* reg, uint8_t* opr)
+uint8_t ALR (registers *reg, uint8_t *opr)
 {
     (void) reg;
     (void) opr;
     return 0;
 }
 
-uint8_t ARR (registers* reg, uint8_t* opr)
+uint8_t ARR (registers *reg, uint8_t *opr)
 {
     (void) reg;
     (void) opr;
     return 0;
 }
 
-uint8_t SAX (registers* reg, uint8_t* opr)
+uint8_t SAX (registers *reg, uint8_t *opr)
 {
     (void) reg;
     (void) opr;
     return 0;
 }
 
-uint8_t AHX (registers* reg, uint8_t* opr)
+uint8_t AHX (registers *reg, uint8_t *opr)
 {
     (void) reg;
     (void) opr;
     return 0;
 }
 
-uint8_t XAA (registers* reg, uint8_t* opr)
+uint8_t XAA (registers *reg, uint8_t *opr)
 {
     (void) reg;
     (void) opr;
     return 0;
 }
 
-uint8_t TAS (registers* reg, uint8_t* opr)
+uint8_t TAS (registers *reg, uint8_t *opr)
 {
     (void) reg;
     (void) opr;
     return 0;
 }
 
-uint8_t SHX (registers* reg, uint8_t* opr)
+uint8_t SHX (registers *reg, uint8_t *opr)
 {
     (void) reg;
     (void) opr;
     return 0;
 }
 
-uint8_t SHY (registers* reg, uint8_t* opr)
+uint8_t SHY (registers *reg, uint8_t *opr)
 {
     (void) reg;
     (void) opr;
     return 0;
 }
 
-uint8_t LAX (registers* reg, uint8_t* opr)
+uint8_t LAX (registers *reg, uint8_t *opr)
 {
     (void) reg;
     (void) opr;
     return 0;
 }
 
-uint8_t DCP (registers* reg, uint8_t* opr)
+uint8_t DCP (registers *reg, uint8_t *opr)
 {
     (void) reg;
     (void) opr;
     return 0;
 }
 
-uint8_t ISC (registers* reg, uint8_t* opr)
+uint8_t ISC (registers *reg, uint8_t *opr)
 {
     (void) reg;
     (void) opr;
     return 0;
 }
 
-uint8_t LAS (registers* reg, uint8_t* opr)
+uint8_t LAS (registers *reg, uint8_t *opr)
 {
     (void) reg;
     (void) opr;
     return 0;
 }
 
-uint8_t AXS (registers* reg, uint8_t* opr)
+uint8_t AXS (registers *reg, uint8_t *opr)
 {
     (void) reg;
     (void) opr;

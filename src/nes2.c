@@ -1,6 +1,6 @@
 #include "nes2.h"
 
-uint8_t NES2_HEADER (FILE* rom, nesheader* head)
+uint8_t NES2_HEADER (FILE *rom, nesheader *head)
 {
     uint8_t read = 0;
     uint8_t res = fread(&read, 1, 1, rom);
@@ -23,7 +23,7 @@ uint8_t NES2_HEADER (FILE* rom, nesheader* head)
     return (res != 8);
 }
 
-uint8_t INES_HEADER (FILE* rom, nesheader* head)
+uint8_t INES_HEADER (FILE *rom, nesheader *head)
 {
     uint8_t res = fread(&head->PRGSHIFT, 1, 1, rom);
     uint8_t read = 0;
@@ -35,7 +35,7 @@ uint8_t INES_HEADER (FILE* rom, nesheader* head)
     return (seek != 0 || res != 3);
 }
 
-uint8_t READ_HEADER (FILE* rom, nesheader* head)
+uint8_t READ_HEADER (FILE *rom, nesheader *head)
 {
     uint8_t res = fread(head->ID, 1, sizeof(ID_STR) - 1, rom);
     res += fread(&head->PRGROM, 1, 1, rom);
@@ -54,14 +54,14 @@ uint8_t READ_HEADER (FILE* rom, nesheader* head)
     return INES_HEADER(rom, head);
 }
 
-uint8_t LOAD_TRAINER (FILE* rom, memory* mem, cartridge* cart)
+uint8_t LOAD_TRAINER (FILE *rom, memory *mem, cartridge *cart)
 {
-    uint8_t* ptr = NULL;
+    uint8_t *ptr = NULL;
     READ_MEM_BYTE(TRAINER_ADD, 0, mem, cart, &ptr);
     return (fread(ptr, 1, TRAINER_SIZE, rom) != TRAINER_SIZE);
 }
 
-uint8_t LOAD_DATA (FILE* rom, uint8_t*** mem, const memtype* map)
+uint8_t LOAD_DATA (FILE *rom, uint8_t ***mem, const memtype *map)
 {
     for (uint8_t bank = 0; bank < map->COUNT; bank++)
         if (fread((*mem)[bank], 1, map->SIZE, rom) != map->SIZE)
@@ -74,13 +74,13 @@ uint32_t CALC_ROM (uint16_t area, uint16_t unit)
     uint32_t size = 8192;
     uint8_t conv = (uint8_t) area;
     if ((area & 0x0F00) == 0x0F00)
-        size = pow(2, conv >> 2) * (((conv & 0x03) * 2) + 1);
+        size = pow(2, conv >> 2) * (((conv & 0x03)  *2) + 1);
     else if (area)
         size = unit * area;
     return size;
 }
 
-uint8_t LOAD_PRG (FILE* rom, nesheader* head, ppumem* ppu)
+uint8_t LOAD_PRG (FILE *rom, nesheader *head, ppumem *ppu)
 {
     uint32_t size = CALC_ROM(head->PRGROM, PRG_UNITS);
     fread(void *Buffer, 1, size, rom);
@@ -88,7 +88,7 @@ uint8_t LOAD_PRG (FILE* rom, nesheader* head, ppumem* ppu)
     return 0;
 }
 
-uint8_t LOAD_CHR (FILE* rom, nesheader* head, ppumem* ppu)
+uint8_t LOAD_CHR (FILE *rom, nesheader *head, ppumem *ppu)
 {
     uint32_t size = CALC_ROM(head->CHRROM, CHR_UNITS);
     fread(void *Buffer, 1, size, rom);
@@ -96,7 +96,7 @@ uint8_t LOAD_CHR (FILE* rom, nesheader* head, ppumem* ppu)
     return 0;
 }
 
-uint8_t LOAD_MISC (FILE* rom)
+uint8_t LOAD_MISC (FILE *rom)
 {
     long loc = ftell(rom);
     int size = fseek(rom, 0, SEEK_END);
@@ -106,7 +106,7 @@ uint8_t LOAD_MISC (FILE* rom)
     return 0;
 }
 */
-uint8_t LOAD_ROM (FILE* rom, nesheader* head, memory* mem, cartridge* cart)
+uint8_t LOAD_ROM (FILE *rom, nesheader *head, memory *mem, cartridge *cart)
 {
     if (READ_HEADER(rom, head)) return 1;
     if (head->FLAGS & 0x04)

@@ -2,9 +2,9 @@
 //#include <windows.h>
 #include "nes2.h"
 
-void LOOP (registers* reg, memory* mem, cartridge* cart)
+void LOOP (registers *reg, memory *mem, cartridge *cart)
 {
-    uint8_t* opr = NULL;
+    uint8_t *opr = NULL;
     uint8_t cycle = JMPB(reg, mem, cart, &opr);
     printf("Initial jump to address: 0x%04X\n", reg->PC);
     operation memptr;
@@ -29,7 +29,7 @@ void LOOP (registers* reg, memory* mem, cartridge* cart)
         PRINT_CPU(reg);
 
         //timespec_get(&t2, TIME_UTC);
-        //Sleep(roundl(((reg->C * cycle) - (t2.tv_nsec - t1.tv_nsec)) / 1000.0));
+        //Sleep(roundl(((reg->C  *cycle) - (t2.tv_nsec - t1.tv_nsec)) / 1000.0));
     
         opr = NULL;
         cycle = 0;
@@ -46,7 +46,7 @@ int main (int argc, char *argv[])
     memory mem = {0};
     if (INIT_MEM(&mem)) return 1;
 
-    FILE* rom = fopen("roms/test.nes", "rb");
+    FILE *rom = fopen("roms/test.nes", "rb");
     if (!rom) return 1;
     nesheader head = {0};
     cartridge cart = {0};

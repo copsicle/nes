@@ -28,16 +28,16 @@ static mapper_ptr add;
 
 typedef struct 
 {
-    uint8_t** PRG;
-    uint8_t** CHR;
-    uint8_t** RAM;
-    uint8_t* PRG_BANK;
-    uint8_t* CHR_BANK;
-    const mapper* MAP;
+    uint8_t **PRG;
+    uint8_t **CHR;
+    uint8_t **RAM;
+    uint8_t *PRG_BANK;
+    uint8_t *CHR_BANK;
+    const mapper *MAP;
 } cartridge;
 
-uint8_t ALLOC_MAPS (cartridge* cart);
-uint8_t* TRANSLATE_MAP (uint16_t add, cartridge* cart);
+uint8_t ALLOC_MAPS (cartridge *cart);
+uint8_t *TRANSLATE_MAP (uint16_t add, cartridge *cart);
 
 extern const mapper mapper_table[0x1000];
 
