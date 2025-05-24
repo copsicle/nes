@@ -6,6 +6,7 @@ void LOOP (registers* reg, memory* mem, cartridge* cart)
 {
     uint8_t* opr = NULL;
     uint8_t cycle = JMPB(reg, mem, cart, &opr);
+    printf("Initial jump to address: 0x%04X\n", reg->PC);
     operation memptr;
     instruction insptr;
     //struct timespec t1, t2;
@@ -15,10 +16,17 @@ void LOOP (registers* reg, memory* mem, cartridge* cart)
         //timespec_get(&t1, TIME_UTC);
         
         cycle += IMM(reg, mem, cart, &opr);
+        printf("\nStart processing instruction: %s (0x%02X)\n",
+            instruction_name[*opr], *opr);
+        
         memptr = operation_table[*opr];
         insptr = instruction_table[*opr];
+        
         if (memptr) cycle += memptr(reg, mem, cart, &opr);
+        if (opr && memptr) printf("Operand is 0x%02X (%d)\n", *opr, *opr);
+        else printf("No operand (implied)\n");
         if (insptr) cycle += insptr(reg, opr);
+        PRINT_CPU(reg);
 
         //timespec_get(&t2, TIME_UTC);
         //Sleep(roundl(((reg->C * cycle) - (t2.tv_nsec - t1.tv_nsec)) / 1000.0));
