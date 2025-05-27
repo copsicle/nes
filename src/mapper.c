@@ -1,52 +1,76 @@
-#include "memory.h"
+#include "types.h"
+#include "mapper.h"
 
 const mapper mapper_table[0x1000] = {
-    [0] = {{0x8000, 0xFFFF, 0x8000, 1}, {0x0000, 0x1FFF, 0x2000, 1}, {0,0,0,0}, {0,0,0,0}, {0,0,0,0}, {0,0,0,0}},
+    [0] = {{0x8000, 0xFFFF, 0x4000, 2}, {0x0000, 0x1FFF, 0x2000, 1}, {0,0,0,0}, {0,0,0,0}, {0,0,0,0}, {0,0,0,0}},
     [1] = {{0x8000, 0xFFFF, 0x4000, 20}, {0x0000, 0x1FFF, 0x1000, 32}, {0x6000, 0x7FFF, 0x2000, 1}, {0,0,0,0}, {0,0,0,0}, {0,0,0,0}},
 };
 
-uint8_t *SEARCH_BANKS (uint8_t **banks ,uint8_t *arr, uint16_t size, uint16_t offadd)
+uint8_t *SEARCH_BANKS (bank *bnk, const memtype *map, uint16_t add)
 {
-    return (banks[arr[offadd / size]] + (offadd % size));
+    add -= map->START;
+    return (bnk->PTR[bnk->ARR[add / map->SIZE]] + (add % map->SIZE));
 }
 
 uint8_t *TRANSLATE_MAP (uint16_t add, cartridge *cart)
 {
     if (add >= cart->MAP->RAM.START && add <= cart->MAP->RAM.END)
-        return *(cart->RAM) + (add % cart->MAP->RAM.SIZE);
+        return *(cart->RAM.PTR) + (add % cart->MAP->RAM.SIZE);
     else if (add >= cart->MAP->PRG.START && add <= cart->MAP->PRG.END)
-        return SEARCH_BANKS(cart->PRG, cart->PRG_BANK, cart->MAP->PRG.SIZE, add - cart->MAP->PRG.START);
+        return SEARCH_BANKS(&cart->PRG, &cart->MAP->PRG, add);
     else if (add >= cart->MAP->CHR.START && add <= cart->MAP->CHR.END)
-        return SEARCH_BANKS(cart->CHR, cart->CHR_BANK, cart->MAP->CHR.SIZE, add - cart->MAP->CHR.START);
+        return SEARCH_BANKS(&cart->CHR, &cart->MAP->CHR, add);
     return NULL;
 }
 
-uint8_t ALLOC_ROM (uint8_t ***bankptr, uint8_t **arrptr, const memtype *map)
+uint8_t ALLOC_ROM (bank* bnk, uint16_t size, const memtype *map)
 {
-    *bankptr = (uint8_t**) calloc(map->COUNT, sizeof(uint8_t*));
-    if (!*bankptr) return 1;
-    for (uint8_t bank = 0; bank < map->COUNT; bank++)
+    // THIS FUNCTION IS MONOLITHIC AND SHOULD PROBABLY GET REPLACED
+    uint64_t actual = 0;
+    if (size < EXP_SIZE)
+        actual = size * CHUNK_SIZE;
+    else if (size < SHIFT_SIZE)
+        actual = pow(2, ((size & 0xFC) >> 2)) * (((size & 0x03) * 2) + 1);
+    else if (size == SHIFT_SIZE)
+        return 1;
+    else
+        actual = ((uint64_t) SHIFT_CHUNK) << (size & 0x0F);
+    
+    uint64_t sub = actual;
+    //uint16_t mirror = (((uint64_t) map->SIZE) * map->COUNT) - actual;
+    bnk->PTR = (uint8_t**) calloc(map->COUNT, sizeof(uint8_t*));
+    if (!(bnk->PTR)) return 1;
+    uint8_t romcnt = (map->END - map->START + 1) / map->SIZE;
+    //uint8_t mir = map->COUNT / 2;
+    bnk->ARR = (uint8_t*) calloc(romcnt, 1);
+    if (!(bnk->ARR)) return 1;
+    for (uint8_t bankcnt = 0; bankcnt < map->COUNT; bankcnt++)
     {
-        (*bankptr)[bank] = (uint8_t*) calloc(map->SIZE, 1);
-        if (!((*bankptr)[bank])) return 1;
+        if (sub > actual || sub == 0)
+        {
+            sub = 0;
+            bnk->PTR[bankcnt] = bnk->PTR[(bankcnt % (actual / map->SIZE))];
+            continue;
+        }
+        if (sub < map->SIZE)
+            sub = 0;
+        else
+            sub -= map->SIZE;
+        bnk->PTR[bankcnt] = (uint8_t*) calloc(map->SIZE, 1);
+        if (!(bnk->PTR[bankcnt])) return 1;
+        if (bankcnt < romcnt)
+            bnk->ARR[bankcnt] = bankcnt;
     }
-    if (arrptr)
-    {
-        uint8_t romcnt = (map->END - map->START + 1) / map->SIZE;
-        *arrptr = (uint8_t*) calloc(romcnt, 1);
-        if (!(*arrptr)) return 1;
-        for (uint8_t bank = 0; bank < romcnt; bank++)
-            (*arrptr)[bank] = bank;
-    }
+    
     return 0;
 }
 
-void FREE_ROM (uint8_t ***bankptr, uint8_t **arrptr, memtype *map)
+void FREE_ROM (bank* bnk, memtype *map)
 {
-    if (*bankptr)
-        for (uint8_t bank = 0; bank < map->COUNT; bank++)
-            free((*bankptr)[bank]);
-    if (arrptr) free(*arrptr);
+    if (bnk->PTR)
+        for (uint8_t bankcnt = 0; bankcnt < map->COUNT; bankcnt++)
+            free(bnk->PTR[bankcnt]);
+    if (bnk->ARR) free(bnk->ARR);
 }
 /*
 uint8_t ALLOC_PRG (maps *mem, mapper *map)
@@ -76,24 +100,24 @@ uint8_t ALLOC_RAM (maps *mem, mapper *map)
 
 }
 */
-uint8_t ALLOC_MAPS (cartridge *cart)
+uint8_t ALLOC_MAPS (cartridge *cart, nesheader *head)
 {
-    if (ALLOC_ROM(&(cart->PRG), &(cart->PRG_BANK), &(cart->MAP->PRG)))
+    if (ALLOC_ROM(&(cart->PRG), head->PRGROM, &(cart->MAP->PRG)))
         return 1;
     if (cart->MAP->CHR.COUNT)
-        if (ALLOC_ROM(&(cart->CHR), &(cart->CHR_BANK), &(cart->MAP->CHR)))
+        if (ALLOC_ROM(&(cart->CHR), head->CHRROM, &(cart->MAP->CHR)))
             return 1;
     if (cart->MAP->RAM.COUNT)
-        if (ALLOC_ROM(&(cart->RAM), NULL, &(cart->MAP->RAM)))
+        if (ALLOC_ROM(&(cart->RAM), (head->PRGSHIFT | SHIFT_SIZE), &(cart->MAP->RAM)))
             return 1;
     return 0;
 }
 
-void FREE_MAPS (cartridge *mem, mapper *map)
+void FREE_MAPS (cartridge *cart, mapper *map)
 {
-    FREE_ROM(&(mem->PRG), &(mem->PRG_BANK), &(map->PRG));
-    FREE_ROM(&(mem->CHR), &(mem->CHR_BANK), &(map->CHR));
-    FREE_ROM(&(mem->RAM), NULL, &(map->RAM));
+    FREE_ROM(&(cart->PRG), &(map->PRG));
+    FREE_ROM(&(cart->CHR), &(map->CHR));
+    FREE_ROM(&(cart->RAM), &(map->RAM));
 }
 
 uint8_t *CART_ADD (uint16_t add, memory *mem)

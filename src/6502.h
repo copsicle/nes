@@ -8,17 +8,7 @@
 #define NTSC_CYCLE 559
 #define PAL_CYCLE 601
 
-typedef struct
-{
-    uint8_t A; // Accumulator
-    uint8_t X; // X register
-    uint8_t Y; // Y register
-    uint16_t PC; // Program counter
-    uint8_t S; // Stack Pointer
-    uint8_t P; // Status Register
-    
-    uint16_t C; // Not a register, rather the clock freq
-} registers;
+struct registers;
 
 void RESET_CPU (registers *reg);
 void PRINT_CPU (registers *reg);

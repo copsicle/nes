@@ -1,3 +1,6 @@
+#include "types.h"
+#include "memory.h"
+#include "mapper.h"
 #include "nes2.h"
 
 uint8_t NES2_HEADER (FILE *rom, nesheader *head)
@@ -61,10 +64,10 @@ uint8_t LOAD_TRAINER (FILE *rom, memory *mem, cartridge *cart)
     return (fread(ptr, 1, TRAINER_SIZE, rom) != TRAINER_SIZE);
 }
 
-uint8_t LOAD_DATA (FILE *rom, uint8_t ***mem, const memtype *map)
+uint8_t LOAD_DATA (FILE *rom, bank* bnk, const memtype *map)
 {
-    for (uint8_t bank = 0; bank < map->COUNT; bank++)
-        if (fread((*mem)[bank], 1, map->SIZE, rom) != map->SIZE)
+    for (uint8_t bankcnt = 0; bankcnt < map->COUNT; bankcnt++)
+        if (fread(bnk->PTR[bankcnt], 1, map->SIZE, rom) != map->SIZE)
             return 1;
     return 0;
 }
@@ -115,7 +118,7 @@ uint8_t LOAD_ROM (FILE *rom, nesheader *head, memory *mem, cartridge *cart)
     
     cart->MAP = &(mapper_table[head->MAPPER & 0x0FFF]);
 
-    if (ALLOC_MAPS(cart))
+    if (ALLOC_MAPS(cart, head))
         return 1;
     if (LOAD_DATA(rom, &(cart->PRG), &(cart->MAP->PRG)))
         return 1;

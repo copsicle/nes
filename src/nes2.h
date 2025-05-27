@@ -12,22 +12,9 @@
 #define PRG_UNITS 0x4000
 #define CHR_UNITS 0x2000
 
-#include "memory.h"
-
-typedef struct 
-{
-    char ID[5];
-    uint16_t PRGROM;
-    uint16_t CHRROM;
-    uint8_t FLAGS;
-    uint16_t MAPPER;
-    uint8_t PRGSHIFT;
-    uint8_t CHRSHIFT;
-    uint8_t TIMING;
-    uint8_t SYSTYPE;
-    uint8_t MISCROMS;
-    uint8_t DEFEXP;
-} nesheader;
+struct nesheader;
+struct memory;
+struct cartridge;
 
 uint8_t LOAD_ROM (FILE *rom, nesheader *head, memory *mem, cartridge *cart);
 

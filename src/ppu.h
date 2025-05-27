@@ -10,16 +10,4 @@
 #define PPU_SPACE 0x4000
 #define OAM_SPACE 0x0100
 
-typedef struct
-{
-    uint8_t *PT0;
-    uint8_t *PT1;
-    uint8_t *NT0;
-    uint8_t *NT1;
-    uint8_t *NT2;
-    uint8_t *NT3;
-    uint8_t *PLT;
-    uint8_t *OAM;
-} ppumem;
-
 #endif

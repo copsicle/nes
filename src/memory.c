@@ -1,3 +1,5 @@
+#include "types.h"
+#include "mapper.h"
 #include "memory.h"
 
 uint8_t INIT_MEM(memory *mem)

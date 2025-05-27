@@ -1,3 +1,4 @@
+#include "types.h"
 #include "6502.h"
 
 /*

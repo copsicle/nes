@@ -11,16 +11,12 @@
 #define ZP_ADD 0x0000
 #define STACK_ADD 0x0100
 
-#include "6502.h"
-#include "mapper.h"
+#include <stdint.h>
+#include <stdio.h>
 
-typedef struct
-{
-    uint8_t *RAM;
-    uint8_t *PPU;
-    uint8_t *APUIO;
-    uint8_t *TEST;
-} memory;
+struct memory;
+struct registers;
+struct cartridge;
 
 uint8_t INIT_MEM(memory *mem);
 void FREE_MEM(memory *mem);

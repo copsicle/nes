@@ -1,6 +1,11 @@
 //#include <time.h>
 //#include <windows.h>
+
+#include "types.h"
+#include "6502.h"
+#include "memory.h"
 #include "nes2.h"
+
 
 void LOOP (registers *reg, memory *mem, cartridge *cart)
 {
