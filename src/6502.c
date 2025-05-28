@@ -29,7 +29,7 @@ void PRINT_CPU (registers *reg)
     printf("A: 0x%02X (%d) | ", reg->A, reg->A);
     printf("X: 0x%02X (%d) | ", reg->X, reg->X);
     printf("Y: 0x%02X (%d)\n", reg->A, reg->A);
-    printf("FLAGS: 0x%02X\n", reg->P);
+    printf("FLAGS: 0x%02X\n\n", reg->P);
 }
 
 void SET_FLAGS (uint8_t *P, uint8_t mask, uint16_t *wres, uint8_t *opr1, uint8_t *opr2)

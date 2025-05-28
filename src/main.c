@@ -16,16 +16,16 @@ void DEBUG_CPU (registers *reg, operation *op, uint8_t phase, uint8_t *opr)
             PRINT_CPU(reg);
             break;
         case 1:
-            printf("\nStart processing instruction: %s (0x%02X)\n",
+            printf("Start processing instruction: %s (0x%02X)\n\n",
                 instruction_name[*opr], *opr);
             break;
         case 2:
             if (opr && *op)
-                printf("Operand is 0x%02X (%d)\n", *opr, *opr);
-            else printf("No operand (implied)\n");
+                printf("Operand is 0x%02X (%d)\n\n", *opr, *opr);
+            else printf("No operand (implied)\n\n");
             break;
         default:
-            printf("Bad CPU phase!\n");
+            printf("Bad CPU phase!\n\n");
     }
 }
 
@@ -42,13 +42,16 @@ uint8_t CPU (registers *reg, memory *mem, cartridge *cart, uint8_t *phase, opera
             return cycle;
         case 1:
             *phase = 2;
-                if (*op)
-                    return (*op)(reg, mem, cart, opr);
+            if (*op)
+                return (*op)(reg, mem, cart, opr);
+            __attribute__((fallthrough));
         case 2:
             *phase = 0;
-                if (*inst)
-                    return (*inst)(reg, *opr);
+            if (*inst)
+                return (*inst)(reg, *opr);
+            return 0;
         default:
+            *phase = 0;
             return 0;
     }
 }
@@ -70,20 +73,24 @@ void LOOP (registers *reg, memory *mem, cartridge *cart, ppu* gpu)
     uint8_t *opr = NULL;
     uint8_t cpucycle = JMPB(reg, mem, cart, &opr);
     uint8_t phase = 0;
-    printf("Initial jump to address: 0x%04X\n", reg->PC);
+    printf("Initial jump to address: 0x%04X\n\n", reg->PC);
     operation memptr;
     instruction insptr;
 
     for (uint8_t clock = 0; 1; clock++)
     {
-        if (clock == MAX_CLOCK) clock = 0;
+        if (clock == MAX_CLOCK)
+            clock = 0;
         
-        if (cpucycle > 0)
-            cpucycle--;
-        else if ((clock % reg->C) == 0)
+        if ((clock % reg->C) == 0)
         {
-            cpucycle = CPU(reg, mem, cart, &phase, &memptr, &insptr, &opr);
-            DEBUG_CPU(reg, &memptr, phase, opr);
+            if (cpucycle > 0)
+                cpucycle--;
+            else
+            {
+                cpucycle = CPU(reg, mem, cart, &phase, &memptr, &insptr, &opr);
+                DEBUG_CPU(reg, &memptr, phase, opr);
+            }
         }
 
         if ((clock % gpu->C) == 0)
