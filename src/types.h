@@ -12,7 +12,7 @@ typedef struct
     uint8_t S; // Stack Pointer
     uint8_t P; // Status Register
     
-    uint16_t C; // Not a register, rather the clock freq
+    uint8_t C; // Not a register, rather the clock freq
 } registers;
 
 typedef struct
@@ -86,7 +86,7 @@ typedef struct
 typedef struct
 {
     ppumem* MEM;
-    
+    uint8_t C;
 } ppu;
 
 #endif

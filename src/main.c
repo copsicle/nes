@@ -3,41 +3,93 @@
 
 #include "types.h"
 #include "6502.h"
+#include "ppu.h"
 #include "memory.h"
 #include "nes2.h"
+#include "main.h"
 
+void DEBUG_CPU (registers *reg, operation *op, uint8_t phase, uint8_t *opr)
+{
+    switch (phase)
+    {
+        case 0:
+            PRINT_CPU(reg);
+            break;
+        case 1:
+            printf("\nStart processing instruction: %s (0x%02X)\n",
+                instruction_name[*opr], *opr);
+            break;
+        case 2:
+            if (opr && *op)
+                printf("Operand is 0x%02X (%d)\n", *opr, *opr);
+            else printf("No operand (implied)\n");
+            break;
+        default:
+            printf("Bad CPU phase!\n");
+    }
+}
 
-void LOOP (registers *reg, memory *mem, cartridge *cart)
+uint8_t CPU (registers *reg, memory *mem, cartridge *cart, uint8_t *phase, operation *op, instruction *inst, uint8_t **opr)
+{
+    switch (*phase)
+    {
+        case 0:
+            *phase = 1;
+            *opr = NULL;
+            uint8_t cycle = IMM(reg, mem, cart, opr);
+            *op = operation_table[**opr];
+            *inst = instruction_table[**opr];
+            return cycle;
+        case 1:
+            *phase = 2;
+                if (*op)
+                    return (*op)(reg, mem, cart, opr);
+        case 2:
+            *phase = 0;
+                if (*inst)
+                    return (*inst)(reg, *opr);
+        default:
+            return 0;
+    }
+}
+
+/*
+MASTER CLOCK CYCLE
+
+PPU DOT - IF 4/5 MASTER CLOCK CYCLES HAVE PASSED
+CPU CYCLE - IF 12/16 MASTER CLOCK CYCLES HAVE PASSED
+
+CPU CYCLE
+
+IF A MEMORY OPERATION/CPU INSTRUCTION TAKES MORE THAN 1 CYCLE,
+IT WOULD BE DONE AT THE SPOT BUT THE NEXT CYCLES WOULD BE SKIPPED UNTIL ITS "DONE"
+*/
+
+void LOOP (registers *reg, memory *mem, cartridge *cart, ppu* gpu)
 {
     uint8_t *opr = NULL;
-    uint8_t cycle = JMPB(reg, mem, cart, &opr);
+    uint8_t cpucycle = JMPB(reg, mem, cart, &opr);
+    uint8_t phase = 0;
     printf("Initial jump to address: 0x%04X\n", reg->PC);
     operation memptr;
     instruction insptr;
-    //struct timespec t1, t2;
 
-    while (1)
+    for (uint8_t clock = 0; 1; clock++)
     {
-        //timespec_get(&t1, TIME_UTC);
+        if (clock == MAX_CLOCK) clock = 0;
         
-        cycle += IMM(reg, mem, cart, &opr);
-        printf("\nStart processing instruction: %s (0x%02X)\n",
-            instruction_name[*opr], *opr);
-        
-        memptr = operation_table[*opr];
-        insptr = instruction_table[*opr];
-        
-        if (memptr) cycle += memptr(reg, mem, cart, &opr);
-        if (opr && memptr) printf("Operand is 0x%02X (%d)\n", *opr, *opr);
-        else printf("No operand (implied)\n");
-        if (insptr) cycle += insptr(reg, opr);
-        PRINT_CPU(reg);
+        if (cpucycle > 0)
+            cpucycle--;
+        else if ((clock % reg->C) == 0)
+        {
+            cpucycle = CPU(reg, mem, cart, &phase, &memptr, &insptr, &opr);
+            DEBUG_CPU(reg, &memptr, phase, opr);
+        }
 
-        //timespec_get(&t2, TIME_UTC);
-        //Sleep(roundl(((reg->C  *cycle) - (t2.tv_nsec - t1.tv_nsec)) / 1000.0));
-    
-        opr = NULL;
-        cycle = 0;
+        if ((clock % gpu->C) == 0)
+        {
+            // DO PPU CYCLE
+        }
     }
 }
 
@@ -50,6 +102,7 @@ int main (int argc, char *argv[])
     RESET_CPU(&reg);
     memory mem = {0};
     if (INIT_MEM(&mem)) return 1;
+    ppu gpu = {0};
 
     FILE *rom = fopen("roms/test.nes", "rb");
     if (!rom) return 1;
@@ -57,10 +110,18 @@ int main (int argc, char *argv[])
     cartridge cart = {0};
     if (LOAD_ROM(rom, &head, &mem, &cart))
         return 1;
-    if (head.TIMING == 1) reg.C = PAL_CYCLE;
-    else reg.C = NTSC_CYCLE;
-
-    LOOP(&reg, &mem, &cart);
+    if (head.TIMING == 1)
+    {
+            reg.C = CPU_PAL;
+            gpu.C = PPU_PAL;
+    }
+    else
+    {
+        reg.C = CPU_NTSC;
+        gpu.C = PPU_NTSC;
+    }
+    
+    LOOP(&reg, &mem, &cart, &gpu);
 
     FREE_MEM(&mem);
     fclose(rom);

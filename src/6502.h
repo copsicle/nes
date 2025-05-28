@@ -5,8 +5,8 @@
 #include <stdint.h>
 #include <stdio.h>
 
-#define NTSC_CYCLE 559
-#define PAL_CYCLE 601
+#define CPU_NTSC 12
+#define CPU_PAL 16
 
 struct registers;
 

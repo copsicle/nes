@@ -9,5 +9,7 @@
 #define PALLETE_SIZE 0x0020
 #define PPU_SPACE 0x4000
 #define OAM_SPACE 0x0100
+#define PPU_NTSC 4
+#define PPU_PAL 5
 
 #endif
