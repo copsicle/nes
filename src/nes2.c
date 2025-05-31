@@ -64,7 +64,7 @@ uint8_t LOAD_TRAINER (FILE *rom, memory *mem, cartridge *cart)
     return (fread(ptr, 1, TRAINER_SIZE, rom) != TRAINER_SIZE);
 }
 
-uint8_t LOAD_DATA (FILE *rom, bank* bnk, const memtype *map)
+uint8_t LOAD_DATA (FILE *rom, bank* bnk, memtype *map)
 {
     for (uint8_t bankcnt = 0; bankcnt < map->COUNT; bankcnt++)
         if (fread(bnk->PTR[bankcnt], 1, map->SIZE, rom) != map->SIZE)

@@ -2,9 +2,9 @@
 #define _MEMORY_H
 
 #define RAM_SIZE 0x0800
-#define PPU_SIZE 0x0008
-#define APUIO_SIZE 0x0018
-#define TEST_SIZE 0x0008
+#define PPU_SIZE 0x08
+#define APUIO_SIZE 0x18
+#define TEST_SIZE 0x08
 #define CART_SIZE 0xBFE0
 #define SPACE_SIZE 0x10000
 

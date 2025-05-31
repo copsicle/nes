@@ -12,7 +12,7 @@ typedef struct
     uint8_t S; // Stack Pointer
     uint8_t P; // Status Register
     
-    uint8_t C; // Not a register, rather the clock freq
+    uint8_t CLK; // Not a register, rather the clock freq
 } registers;
 
 typedef struct
@@ -31,6 +31,7 @@ typedef struct
     memtype PRG_NV;
     memtype CHR_RAM;
     memtype CHR_NV;
+    uint8_t NTCOUNT;
 } mapper;
 
 typedef struct
@@ -45,7 +46,8 @@ typedef struct
     bank PRG;
     bank CHR;
     bank RAM;
-    const mapper *MAP;
+    bank NT;
+    mapper *MAP;
 } cartridge;
 
 typedef struct
@@ -70,7 +72,7 @@ typedef struct
     uint8_t MISCROMS;
     uint8_t DEFEXP;
 } nesheader;
-
+/*
 typedef struct
 {
     uint8_t *PT0;
@@ -79,14 +81,38 @@ typedef struct
     uint8_t *NT1;
     uint8_t *NT2;
     uint8_t *NT3;
-    uint8_t *PLT;
-    uint8_t *OAM;
 } ppumem;
-
+*/
 typedef struct
 {
-    ppumem* MEM;
-    uint8_t C;
+    //ppumem MEM;
+    //uint8_t *REG;
+    uint16_t V;
+    uint16_t T;
+    uint16_t CYC;
+    uint16_t SCL;
+    uint8_t X;
+    uint8_t W;
+    uint8_t BUF;
+    uint8_t SPR;
+    uint8_t HIT;
+    uint8_t EVN;
+
+    uint16_t BGL;
+    uint16_t BGH;
+    uint8_t SPL[0x08];
+    uint8_t SPH[0x08];
+    uint8_t ATL;
+    uint8_t ATH;
+
+    uint8_t SPX[0x08];
+    uint8_t SPA[0x08];
+
+    uint8_t CLK;
+
+    uint8_t PLT[0x20];
+    uint8_t OAM[0x0100];
+    uint8_t OAS[0x20];
 } ppu;
 
 #endif

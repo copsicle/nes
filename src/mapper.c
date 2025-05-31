@@ -1,49 +1,47 @@
 #include "types.h"
 #include "mapper.h"
 
-const mapper mapper_table[0x1000] = {
-    [0] = {{0x8000, 0xFFFF, 0x4000, 2}, {0x0000, 0x1FFF, 0x2000, 1}, {0,0,0,0}, {0,0,0,0}, {0,0,0,0}, {0,0,0,0}},
-    [1] = {{0x8000, 0xFFFF, 0x4000, 20}, {0x0000, 0x1FFF, 0x1000, 32}, {0x6000, 0x7FFF, 0x2000, 1}, {0,0,0,0}, {0,0,0,0}, {0,0,0,0}},
+mapper mapper_table[0x1000] = {
+    [0] = {{0x8000, 0xFFFF, 0x4000, 2}, {0x0000, 0x1FFF, 0x1000, 2}, {0}, {0}, {0}, {0}, 2},
+    [1] = {{0x8000, 0xFFFF, 0x4000, 20}, {0x0000, 0x1FFF, 0x1000, 32}, {0x6000, 0x7FFF, 0x2000, 1}, {0}, {0}, {0}, 2},
 };
-
-uint8_t *SEARCH_BANKS (bank *bnk, const memtype *map, uint16_t add)
-{
-    add -= map->START;
-    return (bnk->PTR[bnk->ARR[add / map->SIZE]] + (add % map->SIZE));
-}
 
 uint8_t *TRANSLATE_MAP (uint16_t add, cartridge *cart)
 {
-    if (add >= cart->MAP->RAM.START && add <= cart->MAP->RAM.END)
-        return *(cart->RAM.PTR) + (add % cart->MAP->RAM.SIZE);
-    else if (add >= cart->MAP->PRG.START && add <= cart->MAP->PRG.END)
-        return SEARCH_BANKS(&cart->PRG, &cart->MAP->PRG, add);
-    else if (add >= cart->MAP->CHR.START && add <= cart->MAP->CHR.END)
-        return SEARCH_BANKS(&cart->CHR, &cart->MAP->CHR, add);
+    mapper *map = cart->MAP;
+    if (add >= map->RAM.START && add <= map->RAM.END)
+        return *(cart->RAM.PTR) + (add % map->RAM.SIZE);
+    else if (add >= map->PRG.START && add <= map->PRG.END)
+    {
+        add -= map->PRG.START;
+        return (cart->PRG.PTR[cart->PRG.ARR[add / map->PRG.SIZE]] + (add % map->PRG.SIZE));
+    }
     return NULL;
 }
 
-uint8_t ALLOC_ROM (bank* bnk, uint16_t size, const memtype *map)
+uint64_t ROM_SIZE (uint16_t size)
+{
+    if (size < EXP_SIZE)
+        return size * CHUNK_SIZE;
+    else if (size < SHIFT_SIZE)
+        return pow(2, ((size & 0xFC) >> 2)) * (((size & 0x03) * 2) + 1);
+    else if (size == SHIFT_SIZE)
+        return 0;
+    return ((uint64_t) SHIFT_CHUNK) << (size & 0x0F);
+}
+
+uint8_t ALLOC_ROM (bank* bnk, uint16_t size, memtype *map)
 {
     // THIS FUNCTION IS MONOLITHIC AND SHOULD PROBABLY GET REPLACED
-    uint64_t actual = 0;
-    if (size < EXP_SIZE)
-        actual = size * CHUNK_SIZE;
-    else if (size < SHIFT_SIZE)
-        actual = pow(2, ((size & 0xFC) >> 2)) * (((size & 0x03) * 2) + 1);
-    else if (size == SHIFT_SIZE)
-        return 1;
-    else
-        actual = ((uint64_t) SHIFT_CHUNK) << (size & 0x0F);
-    
+    uint64_t actual = ROM_SIZE(size);
     uint64_t sub = actual;
     //uint16_t mirror = (((uint64_t) map->SIZE) * map->COUNT) - actual;
     bnk->PTR = (uint8_t**) calloc(map->COUNT, sizeof(uint8_t*));
-    if (!(bnk->PTR)) return 1;
     uint8_t romcnt = (map->END - map->START + 1) / map->SIZE;
     //uint8_t mir = map->COUNT / 2;
     bnk->ARR = (uint8_t*) calloc(romcnt, 1);
-    if (!(bnk->ARR)) return 1;
+    if (!(bnk->ARR) || !(bnk->PTR) || !actual)
+        return 1;
     for (uint8_t bankcnt = 0; bankcnt < map->COUNT; bankcnt++)
     {
         if (sub > actual || sub == 0)
@@ -61,7 +59,6 @@ uint8_t ALLOC_ROM (bank* bnk, uint16_t size, const memtype *map)
         if (bankcnt < romcnt)
             bnk->ARR[bankcnt] = bankcnt;
     }
-    
     return 0;
 }
 

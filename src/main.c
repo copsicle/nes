@@ -82,7 +82,7 @@ void LOOP (registers *reg, memory *mem, cartridge *cart, ppu* gpu)
         if (clock == MAX_CLOCK)
             clock = 0;
         
-        if ((clock % reg->C) == 0)
+        if ((clock % reg->CLK) == 0)
         {
             if (cpucycle > 0)
                 cpucycle--;
@@ -93,10 +93,25 @@ void LOOP (registers *reg, memory *mem, cartridge *cart, ppu* gpu)
             }
         }
 
-        if ((clock % gpu->C) == 0)
+        if ((clock % gpu->CLK) == 0)
         {
             // DO PPU CYCLE
         }
+    }
+}
+
+void SET_TIMING (registers *reg, ppu *gpu, uint8_t timing)
+{
+    switch (timing)
+    {
+        case 1:
+            reg->CLK = CPU_PAL;
+            gpu->CLK = PPU_PAL;
+            break;
+        default:
+            reg->CLK = CPU_NTSC;
+            gpu->CLK = PPU_NTSC;
+            break;
     }
 }
 
@@ -109,27 +124,20 @@ int main (int argc, char *argv[])
     RESET_CPU(&reg);
     memory mem = {0};
     if (INIT_MEM(&mem)) return 1;
-    ppu gpu = {0};
-
     FILE *rom = fopen("roms/test.nes", "rb");
     if (!rom) return 1;
     nesheader head = {0};
     cartridge cart = {0};
+    ppu gpu = {0};
     if (LOAD_ROM(rom, &head, &mem, &cart))
         return 1;
-    if (head.TIMING == 1)
-    {
-            reg.C = CPU_PAL;
-            gpu.C = PPU_PAL;
-    }
-    else
-    {
-        reg.C = CPU_NTSC;
-        gpu.C = PPU_NTSC;
-    }
-    
+    if (INIT_NT(&head, &cart))
+        return 1;
+    SET_TIMING(&reg, &gpu, head.TIMING);
+
     LOOP(&reg, &mem, &cart, &gpu);
 
+    FREE_NT(&cart);
     FREE_MEM(&mem);
     fclose(rom);
     return 0;

@@ -23,21 +23,32 @@ void FREE_MEM(memory *mem)
     free(mem->TEST);
 }
 
-uint8_t *TRANSLATE_ADD (uint16_t add, memory *mem, cartridge *cart)
+uint8_t *CPU_ADD (uint16_t add, memory *mem, cartridge *cart)
 {
-    if (add < 0x2000) return mem->RAM + (add % RAM_SIZE);
-    else if (add < 0x4000) return mem->PPU + (add % PPU_SIZE);
-    else if (add < 0x4018) return mem->APUIO + (add % APUIO_SIZE);
-    else if (add < 0x4020) return mem->TEST + (add % TEST_SIZE);
-    return TRANSLATE_MAP(add, cart);
-    //else return mem->CART + (add - (SPACE_SIZE - CART_SIZE));
+    switch (add / 0x2000) 
+    {
+        case 0:
+            return mem->RAM + (add % RAM_SIZE);
+        case 1:
+            return mem->PPU + (add % PPU_SIZE);
+        case 2:
+            if (add < 0x4018)
+                return mem->APUIO + (add % APUIO_SIZE);
+            else if (add < 0x4020)
+                return mem->TEST + (add % TEST_SIZE);
+            __attribute__((fallthrough));
+        default:
+            return TRANSLATE_MAP(add, cart);
+    }
 }
 
 uint8_t READ_MEM_BYTE (uint16_t add, uint8_t off, memory *mem, cartridge *cart, uint8_t **opr)
 {
     uint16_t comb = add + off;
-    *opr = TRANSLATE_ADD(comb, mem, cart);
+    *opr = CPU_ADD(comb, mem, cart);
     printf("Memory address 0x%04X was accessed\n", comb);
+    if (add >= 0x2000 && add < 0x4000) 
+        NULL; // TODO: HANDLE REGISTER READ
     return 1 + ((add >> 8) != (comb >> 8)); 
 }
 

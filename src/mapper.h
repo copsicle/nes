@@ -17,6 +17,6 @@ struct mapper;
 uint8_t ALLOC_MAPS (cartridge *cart, nesheader* head);
 uint8_t *TRANSLATE_MAP (uint16_t add, cartridge *cart);
 
-extern const mapper mapper_table[0x1000];
+extern mapper mapper_table[0x1000];
 
 #endif
