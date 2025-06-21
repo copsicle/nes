@@ -29,10 +29,9 @@
 #define PPUADDR 0x06
 #define PPUDATA 0x07
 
-struct nesheader;
-struct cartridge;
+struct nes;
 
-uint8_t INIT_NT (nesheader *head, cartridge *cart);
-void FREE_NT (cartridge *cart);
+uint8_t INIT_NT (nes con);
+void FREE_NT (nes con);
 
 #endif

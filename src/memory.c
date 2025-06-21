@@ -1,8 +1,8 @@
 #include "types.h"
 #include "mapper.h"
 #include "memory.h"
-
-uint8_t INIT_MEM(memory *mem)
+/*
+uint8_t INIT_MEM(nes con)
 {
     if (! (mem->RAM = (uint8_t*) calloc(RAM_SIZE, sizeof(uint8_t))))
         return 1;
@@ -15,245 +15,230 @@ uint8_t INIT_MEM(memory *mem)
     return 0;
 }
 
-void FREE_MEM(memory *mem)
+void FREE_MEM(nes con)
 {
     free(mem->RAM);
     free(mem->PPU);
     free(mem->APUIO);
     free(mem->TEST);
 }
-
-uint8_t *CPU_ADD (uint16_t add, memory *mem, cartridge *cart)
+*/
+uint8_t *CPU_ADD (uint16_t add, nes con)
 {
     switch (add / 0x2000) 
     {
         case 0:
-            return mem->RAM + (add % RAM_SIZE);
+            return con->CPU->RAM + (add % RAM_SIZE);
         case 1:
-            return mem->PPU + (add % PPU_SIZE);
+            return con->PPU->REG + (add % PPU_SIZE);
         case 2:
-            if (add < 0x4018)
-                return mem->APUIO + (add % APUIO_SIZE);
+            if (add < 0x4014)
+                return con->APU->REG + (add % APU_SIZE);
+            else if (add < 0x4018)
+                return con->CPU->IO + (add % IO_SIZE);
             else if (add < 0x4020)
-                return mem->TEST + (add % TEST_SIZE);
+                return NULL; // Unsupported
             __attribute__((fallthrough));
         default:
-            return TRANSLATE_MAP(add, cart);
+            return TRANSLATE_MAP(add, con);
     }
 }
 
-uint8_t READ_MEM_BYTE (uint16_t add, uint8_t off, memory *mem, cartridge *cart, uint8_t **opr)
+uint8_t READ_MEM_BYTE (uint16_t add, uint8_t off, nes con)
 {
     uint16_t comb = add + off;
-    *opr = CPU_ADD(comb, mem, cart);
+    con->CPU->OPR = CPU_ADD(comb, con);
     printf("Memory address 0x%04X was accessed\n", comb);
     if (add >= 0x2000 && add < 0x4000) 
         NULL; // TODO: HANDLE REGISTER READ
     return 1 + ((add >> 8) != (comb >> 8)); 
 }
 
-uint8_t READ_MEM_WORD (uint16_t add, uint8_t off, memory *mem, cartridge *cart, uint16_t *opr)
+uint8_t READ_MEM_WORD (uint16_t add, uint8_t off, nes con, uint16_t *opr)
 {
-    uint8_t *ptr = NULL;
-    uint8_t cycle = READ_MEM_BYTE(add, off, mem, cart, &ptr);
-    *opr = (uint16_t) *ptr;
+    uint8_t cycle = READ_MEM_BYTE(add, off, con);
+    *opr = (uint16_t) *con->CPU->OPR;
     uint16_t comb = add + ((uint16_t)off) + 1;
     cycle += (off == 0xFF) + ((comb >> 8) != (add >> 8));
-    cycle += READ_MEM_BYTE(comb, 0, mem, cart, &ptr);
-    *opr |= (((uint16_t)*ptr) << 8);
+    cycle += READ_MEM_BYTE(comb, 0, con);
+    *opr |= (((uint16_t)*con->CPU->OPR) << 8);
     return cycle;
 }
 
-uint8_t IMM (registers *reg, memory *mem, cartridge *cart, uint8_t **opr)
+uint8_t IMM (nes con)
 {
-    return READ_MEM_BYTE((reg->PC)++, 0, mem, cart, opr);
+    return READ_MEM_BYTE((con->CPU->PC)++, 0, con);
 }
 
-uint8_t PTR (registers *reg, memory *mem, cartridge *cart, uint16_t *ptr)
+uint8_t PTR (nes con, uint16_t *ptr)
 {
-    uint8_t cycle = READ_MEM_WORD(reg->PC, 0, mem, cart, ptr);
-    reg->PC += 2;
+    uint8_t cycle = READ_MEM_WORD(con->CPU->PC, 0, con, ptr);
+    con->CPU->PC += 2;
     return cycle;
 }
 
-uint8_t ZP (registers *reg, memory *mem, cartridge *cart, uint8_t **opr)
+uint8_t ZP (nes con)
 {
-    uint8_t *add = NULL;
-    uint8_t cycle = IMM(reg, mem, cart, &add);
-    cycle += READ_MEM_BYTE(ZP_ADD, *add, mem, cart, opr);
+    uint8_t cycle = IMM(con);
+    cycle += READ_MEM_BYTE(ZP_ADD, *con->CPU->OPR, con);
     return cycle;
 }
 
-uint8_t ZPX (registers *reg, memory *mem, cartridge *cart, uint8_t **opr)
+uint8_t ZPX (nes con)
 {
-    uint8_t *add = NULL;
-    uint8_t cycle = IMM(reg, mem, cart, &add);
-    uint8_t off = reg->X + *add;
-    cycle += READ_MEM_BYTE(ZP_ADD, off, mem, cart, opr);
+    uint8_t cycle = IMM(con);
+    uint8_t off = con->CPU->X + *con->CPU->OPR;
+    cycle += READ_MEM_BYTE(ZP_ADD, off, con);
     return 1 + cycle;
 }
 
-uint8_t ZPY (registers *reg, memory *mem, cartridge *cart, uint8_t **opr)
+uint8_t ZPY (nes con)
 {
-    uint8_t *add = NULL;
-    uint8_t cycle = IMM(reg, mem, cart, &add);
-    uint8_t off = reg->Y + *add;
-    cycle += READ_MEM_BYTE(ZP_ADD, off, mem, cart, opr);
+    uint8_t cycle = IMM(con);
+    uint8_t off = con->CPU->Y + *con->CPU->OPR;
+    cycle += READ_MEM_BYTE(ZP_ADD, off, con);
     return 1 + cycle;
 }
 
-uint8_t ABS (registers *reg, memory *mem, cartridge *cart, uint8_t **opr)
+uint8_t ABS (nes con)
 {
     uint16_t abs = 0;
-    uint8_t cycle = PTR(reg, mem, cart, &abs);
-    cycle += READ_MEM_BYTE(abs, 0, mem, cart, opr);
+    uint8_t cycle = PTR(con, &abs);
+    cycle += READ_MEM_BYTE(abs, 0, con);
     return cycle;
 }
 
-uint8_t ABX (registers *reg, memory *mem, cartridge *cart, uint8_t **opr)
+uint8_t ABX (nes con)
 {
     uint16_t abs = 0;
-    uint8_t cycle = PTR(reg, mem, cart, &abs);
-    cycle += READ_MEM_BYTE(abs, reg->X, mem, cart, opr);
+    uint8_t cycle = PTR(con, &abs);
+    cycle += READ_MEM_BYTE(abs, con->CPU->X, con);
     return cycle;
 }
 
-uint8_t ABY (registers *reg, memory *mem, cartridge *cart, uint8_t **opr)
+uint8_t ABY (nes con)
 {
     uint16_t abs = 0;
-    uint8_t cycle = PTR(reg, mem, cart, &abs);
-    cycle += READ_MEM_BYTE(abs, reg->Y, mem, cart, opr);
+    uint8_t cycle = PTR(con, &abs);
+    cycle += READ_MEM_BYTE(abs, con->CPU->Y, con);
     return cycle;
 }
 
-uint8_t IN (registers *reg, memory *mem, cartridge *cart, uint8_t **opr)
+uint8_t IN (nes con)
 {
     uint16_t ptr = 0;
-    uint8_t cycle = PTR(reg, mem, cart, &ptr);
-    cycle += READ_MEM_WORD(ptr, 0, mem, cart, &ptr);
-    cycle += READ_MEM_BYTE(ptr, 0, mem, cart, opr);
+    uint8_t cycle = PTR(con, &ptr);
+    cycle += READ_MEM_WORD(ptr, 0, con, &ptr);
+    cycle += READ_MEM_BYTE(ptr, 0, con);
     return cycle;
 }
 
-uint8_t INDX (registers *reg, memory *mem, cartridge *cart, uint8_t **opr)
+uint8_t INDX (nes con)
 {
-    uint8_t *add = NULL;
-    uint8_t cycle = IMM(reg, mem, cart, &add);
-    uint8_t off = *add + reg->X;
+    uint8_t cycle = IMM(con);
+    uint8_t off = *con->CPU->OPR + con->CPU->X;
     uint16_t ptr = 0;
-    cycle += READ_MEM_WORD(ZP_ADD, off, mem, cart, &ptr);
-    cycle += READ_MEM_BYTE(ptr, 0, mem, cart, opr);
+    cycle += READ_MEM_WORD(ZP_ADD, off, con, &ptr);
+    cycle += READ_MEM_BYTE(ptr, 0, con);
     return cycle;
 }
 
-uint8_t INDY (registers *reg, memory *mem, cartridge *cart, uint8_t **opr)
+uint8_t INDY (nes con)
 {
-    uint8_t *add = 0;
-    uint8_t cycle = IMM(reg, mem, cart, &add);
+    uint8_t cycle = IMM(con);
     uint16_t ptr = 0;
-    cycle += READ_MEM_WORD(ZP_ADD, *add, mem, cart, &ptr);
-    cycle += READ_MEM_BYTE(ptr, reg->Y, mem, cart, opr);
+    cycle += READ_MEM_WORD(ZP_ADD, *con->CPU->OPR, con, &ptr);
+    cycle += READ_MEM_BYTE(ptr, con->CPU->Y, con);
     return cycle;
 }
 
-uint8_t PUSH_BYTE (registers *reg, memory *mem, cartridge *cart, uint8_t opr)
+uint8_t PUSH_BYTE (nes con, uint8_t opr)
 {
-    uint8_t *ptr = NULL;
-    uint8_t cycle = READ_MEM_BYTE(STACK_ADD, (reg->S), mem, cart, &ptr);
-    *ptr = opr;
-    (reg->S)--;
+    uint8_t cycle = READ_MEM_BYTE(STACK_ADD, con->CPU->S, con);
+    *con->CPU->OPR = opr;
+    (con->CPU->S)--;
     return cycle;
 }
 
-uint8_t POP_BYTE (registers *reg, memory *mem, cartridge *cart, uint8_t **opr)
+uint8_t POP_BYTE (nes con)
 {
-    (reg->S)++;
-    uint8_t cycle = READ_MEM_BYTE(STACK_ADD, (reg->S), mem, cart, opr);
+    (con->CPU->S)++;
+    uint8_t cycle = READ_MEM_BYTE(STACK_ADD, (con->CPU->S), con);
     return cycle;
 }
 
-uint8_t PUSH_WORD (registers *reg, memory *mem, cartridge *cart, uint16_t opr)
+uint8_t PUSH_WORD (nes con, uint16_t opr)
 {
-    uint8_t cycle = PUSH_BYTE(reg, mem, cart, (uint8_t) opr);
-    cycle += PUSH_BYTE(reg, mem, cart, (uint8_t)(opr >> 8));
+    uint8_t cycle = PUSH_BYTE(con, (uint8_t) opr);
+    cycle += PUSH_BYTE(con, (uint8_t)(opr >> 8));
     return cycle;
 }
 
-uint8_t POP_WORD (registers *reg, memory *mem, cartridge *cart, uint16_t *opr)
+uint8_t POP_WORD (nes con, uint16_t *opr)
 {
-    uint8_t *pop = NULL;
-    uint8_t cycle = POP_BYTE(reg, mem, cart, &pop);
-    *opr = ((uint16_t)*pop) << 8;
-    cycle += POP_BYTE(reg, mem, cart, &pop);
-    *opr |= (uint16_t)*pop;
+    uint8_t cycle = POP_BYTE(con);
+    *opr = ((uint16_t)*(con->CPU->OPR)) << 8;
+    cycle += POP_BYTE(con);
+    *opr |= (uint16_t)*(con->CPU->OPR);
     return cycle;
 }
 
-uint8_t PSHP (registers *reg, memory *mem, cartridge *cart, uint8_t **opr)
+uint8_t PSHP (nes con)
 {
-    (void) opr;
-    return PUSH_BYTE(reg, mem, cart, reg->P | 0x10);
+    return PUSH_BYTE(con, con->CPU->P | 0x10);
 }
 
-uint8_t PLLP (registers *reg, memory *mem, cartridge *cart, uint8_t **opr)
+uint8_t PLLP (nes con)
 {
-    (void) opr;
-    uint8_t *flg = NULL;
-    uint8_t cycle = POP_BYTE(reg, mem, cart, &flg);
-    reg->P = ((*flg) & 0xCF);
+    uint8_t cycle = POP_BYTE(con);
+    con->CPU->P = (*(con->CPU->OPR) & 0xCF);
     return cycle;
 }
 
-uint8_t PIRQ (registers *reg, memory *mem, cartridge *cart, uint8_t **opr)
+uint8_t PIRQ (nes con)
 {
-    (void) opr;
-    uint8_t cycle = PUSH_WORD(reg, mem, cart, ++(reg->PC));
-    cycle += PSHP(reg, mem, cart, NULL);
+    uint8_t cycle = PUSH_WORD(con, ++(con->CPU->PC));
+    cycle += PSHP(con);
     return 1 + cycle;
 }
 
-uint8_t JMPB (registers *reg, memory *mem, cartridge *cart, uint8_t **opr)
+uint8_t JMPB (nes con)
 {
-    (void) opr;
-    return READ_MEM_WORD(reg->PC, 0, mem, cart, &reg->PC);
+    return READ_MEM_WORD(con->CPU->PC, 0, con, &con->CPU->PC);
 }
 
-uint8_t JMPN (registers *reg, memory *mem, cartridge *cart, uint8_t **opr)
+uint8_t JMPN (nes con)
 {
-    (void) opr;
-    uint8_t cycle = READ_MEM_WORD(reg->PC, 0, mem, cart, &reg->PC);
-    cycle += READ_MEM_WORD(reg->PC, 0, mem, cart, &reg->PC);
+    uint8_t cycle = READ_MEM_WORD(con->CPU->PC, 0, con, &con->CPU->PC);
+    cycle += READ_MEM_WORD(con->CPU->PC, 0, con, &con->CPU->PC);
     return cycle;
 }
 
-uint8_t JMPS (registers *reg, memory *mem, cartridge *cart, uint8_t **opr)
+uint8_t JMPS (nes con)
 {
-    (void) opr;
     uint16_t ptr = 0;
-    uint8_t cycle = PTR(reg, mem, cart, &ptr);
-    cycle += PUSH_WORD(reg, mem, cart, reg->PC);
-    reg->PC = ptr;
+    uint8_t cycle = PTR(con, &ptr);
+    cycle += PUSH_WORD(con, con->CPU->PC);
+    con->CPU->PC = ptr;
     return 1 + cycle;
 }
 
-uint8_t PSHA (registers *reg, memory *mem, cartridge *cart, uint8_t **opr)
+uint8_t PSHA (nes con)
 {
-    (void) opr;
-    return PUSH_BYTE(reg, mem, cart, reg->A);
+    return PUSH_BYTE(con, con->CPU->A);
 }
 
-uint8_t PLLA (registers *reg, memory *mem, cartridge *cart, uint8_t **opr)
+uint8_t PLLA (nes con)
 {
-    (void) opr;
-    uint8_t *add = &(reg->A);
-    return POP_BYTE(reg, mem, cart, &add);
+    uint8_t cycle = POP_BYTE(con);
+    con->CPU->A = *(con->CPU->OPR);
+    return cycle;
 }
 
-uint8_t PRTS (registers *reg, memory *mem, cartridge *cart, uint8_t **opr)
+uint8_t PRTS (nes con)
 {
-    (void) opr;
-    uint8_t cycle = POP_WORD(reg, mem, cart, &(reg->PC));
-    (reg->PC)++;
+    uint8_t cycle = POP_WORD(con, &(con->CPU->PC));
+    (con->CPU->PC)++;
     return 3 + cycle;
 }
 

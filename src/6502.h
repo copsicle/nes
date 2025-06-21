@@ -8,14 +8,12 @@
 #define CPU_NTSC 12
 #define CPU_PAL 16
 
-struct registers;
+#include "types.h"
 
-void RESET_CPU (registers *reg);
-void PRINT_CPU (registers *reg);
+void RESET_CPU (nes con);
+void PRINT_CPU (nes con);
 
-typedef uint8_t (*instruction)(registers*, uint8_t*);
-
-extern const instruction instruction_table[0x100];
+extern const operation instruction_table[0x100];
 extern const char instruction_name[0x100][4];
 
 

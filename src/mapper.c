@@ -6,15 +6,15 @@ mapper mapper_table[0x1000] = {
     [1] = {{0x8000, 0xFFFF, 0x4000, 20}, {0x0000, 0x1FFF, 0x1000, 32}, {0x6000, 0x7FFF, 0x2000, 1}, {0}, {0}, {0}, 2},
 };
 
-uint8_t *TRANSLATE_MAP (uint16_t add, cartridge *cart)
+uint8_t *TRANSLATE_MAP (uint16_t add, nes con)
 {
-    mapper *map = cart->MAP;
+    mapper *map = con->CART->MAP;
     if (add >= map->RAM.START && add <= map->RAM.END)
-        return *(cart->RAM.PTR) + (add % map->RAM.SIZE);
+        return *(con->CART->RAM.PTR) + (add % map->RAM.SIZE);
     else if (add >= map->PRG.START && add <= map->PRG.END)
     {
         add -= map->PRG.START;
-        return (cart->PRG.PTR[cart->PRG.ARR[add / map->PRG.SIZE]] + (add % map->PRG.SIZE));
+        return (con->CART->PRG.PTR[con->CART->PRG.ARR[add / map->PRG.SIZE]] + (add % map->PRG.SIZE));
     }
     return NULL;
 }
@@ -30,7 +30,7 @@ uint64_t ROM_SIZE (uint16_t size)
     return ((uint64_t) SHIFT_CHUNK) << (size & 0x0F);
 }
 
-uint8_t ALLOC_ROM (bank* bnk, uint16_t size, memtype *map)
+uint8_t ALLOC_ROM (bank bnk, uint16_t size, memtype *map)
 {
     // THIS FUNCTION IS MONOLITHIC AND SHOULD PROBABLY GET REPLACED
     uint64_t actual = ROM_SIZE(size);
@@ -62,7 +62,7 @@ uint8_t ALLOC_ROM (bank* bnk, uint16_t size, memtype *map)
     return 0;
 }
 
-void FREE_ROM (bank* bnk, memtype *map)
+void FREE_ROM (bank bnk, memtype *map)
 {
     if (bnk->PTR)
         for (uint8_t bankcnt = 0; bankcnt < map->COUNT; bankcnt++)
@@ -97,15 +97,15 @@ uint8_t ALLOC_RAM (maps *mem, mapper *map)
 
 }
 */
-uint8_t ALLOC_MAPS (cartridge *cart, nesheader *head)
+uint8_t ALLOC_MAPS (nes con)
 {
-    if (ALLOC_ROM(&(cart->PRG), head->PRGROM, &(cart->MAP->PRG)))
+    if (ALLOC_ROM(&(con->CART->PRG), con->HEAD->PRGROM, &(con->CART->MAP->PRG)))
         return 1;
-    if (cart->MAP->CHR.COUNT)
-        if (ALLOC_ROM(&(cart->CHR), head->CHRROM, &(cart->MAP->CHR)))
+    if (con->CART->MAP->CHR.COUNT)
+        if (ALLOC_ROM(&(con->CART->CHR), con->HEAD->CHRROM, &(con->CART->MAP->CHR)))
             return 1;
-    if (cart->MAP->RAM.COUNT)
-        if (ALLOC_ROM(&(cart->RAM), (head->PRGSHIFT | SHIFT_SIZE), &(cart->MAP->RAM)))
+    if (con->CART->MAP->RAM.COUNT)
+        if (ALLOC_ROM(&(con->CART->RAM), (con->HEAD->PRGSHIFT | SHIFT_SIZE), &(con->CART->MAP->RAM)))
             return 1;
     return 0;
 }
@@ -117,10 +117,9 @@ void FREE_MAPS (cartridge *cart, mapper *map)
     FREE_ROM(&(cart->RAM), &(map->RAM));
 }
 
-uint8_t *CART_ADD (uint16_t add, memory *mem)
+uint8_t *CART_ADD (uint16_t add)
 {
     (void) add;
-    (void) mem;
 
     return NULL;
 }

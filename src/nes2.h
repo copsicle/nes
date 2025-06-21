@@ -12,10 +12,8 @@
 #define PRG_UNITS 0x4000
 #define CHR_UNITS 0x2000
 
-struct nesheader;
-struct memory;
-struct cartridge;
+struct nes;
 
-uint8_t LOAD_ROM (FILE *rom, nesheader *head, memory *mem, cartridge *cart);
+uint8_t LOAD_ROM (FILE *rom, nes con);
 
 #endif

@@ -8,19 +8,20 @@
 #include "nes2.h"
 #include "main.h"
 
-void DEBUG_CPU (registers *reg, operation *op, uint8_t phase, uint8_t *opr)
+void DEBUG_CPU (nes con, operation *op)
 {
-    switch (phase)
+    uint8_t *opr = con->CPU->OPR;
+    switch (con->CPU->PHS)
     {
-        case 0:
-            PRINT_CPU(reg);
+        case FETCH:
+            PRINT_CPU(con);
             break;
-        case 1:
+        case MEMOP:
             printf("Start processing instruction: %s (0x%02X)\n\n",
                 instruction_name[*opr], *opr);
             break;
-        case 2:
-            if (opr && *op)
+        case WORK:
+            if (con->CPU->OPR && *op)
                 printf("Operand is 0x%02X (%d)\n\n", *opr, *opr);
             else printf("No operand (implied)\n\n");
             break;
@@ -29,29 +30,28 @@ void DEBUG_CPU (registers *reg, operation *op, uint8_t phase, uint8_t *opr)
     }
 }
 
-uint8_t CPU (registers *reg, memory *mem, cartridge *cart, uint8_t *phase, operation *op, instruction *inst, uint8_t **opr)
+uint8_t CPU (nes con, operation *op, operation *inst)
 {
-    switch (*phase)
+    switch (con->CPU->PHS)
     {
-        case 0:
-            *phase = 1;
-            *opr = NULL;
-            uint8_t cycle = IMM(reg, mem, cart, opr);
-            *op = operation_table[**opr];
-            *inst = instruction_table[**opr];
+        case FETCH:
+            con->CPU->PHS = MEMOP;
+            uint8_t cycle = IMM(con);
+            *op = operation_table[*con->CPU->OPR];
+            *inst = instruction_table[*con->CPU->OPR];
             return cycle;
-        case 1:
-            *phase = 2;
+        case MEMOP:
+            con->CPU->PHS = WORK;
             if (*op)
-                return (*op)(reg, mem, cart, opr);
+                return (*op)(con);
             __attribute__((fallthrough));
-        case 2:
-            *phase = 0;
+        case WORK:
+            con->CPU->PHS = FETCH;
             if (*inst)
-                return (*inst)(reg, *opr);
+                return (*inst)(con);
             return 0;
         default:
-            *phase = 0;
+            con->CPU->PHS = FETCH;
             return 0;
     }
 }
@@ -68,49 +68,47 @@ IF A MEMORY OPERATION/CPU INSTRUCTION TAKES MORE THAN 1 CYCLE,
 IT WOULD BE DONE AT THE SPOT BUT THE NEXT CYCLES WOULD BE SKIPPED UNTIL ITS "DONE"
 */
 
-void LOOP (registers *reg, memory *mem, cartridge *cart, ppu* gpu)
+void LOOP (nes con)
 {
-    uint8_t *opr = NULL;
-    uint8_t cpucycle = JMPB(reg, mem, cart, &opr);
-    uint8_t phase = 0;
-    printf("Initial jump to address: 0x%04X\n\n", reg->PC);
+    uint8_t cpucycle = JMPB(con);
+    printf("Initial jump to address: 0x%04X\n\n", con->CPU->PC);
     operation memptr;
-    instruction insptr;
+    operation insptr;
 
     for (uint8_t clock = 0; 1; clock++)
     {
         if (clock == MAX_CLOCK)
             clock = 0;
         
-        if ((clock % reg->CLK) == 0)
+        if ((clock % con->CPU->CLK) == 0)
         {
             if (cpucycle > 0)
                 cpucycle--;
             else
             {
-                cpucycle = CPU(reg, mem, cart, &phase, &memptr, &insptr, &opr);
-                DEBUG_CPU(reg, &memptr, phase, opr);
+                cpucycle = CPU(con, &memptr, &insptr);
+                DEBUG_CPU(con, &memptr);
             }
         }
 
-        if ((clock % gpu->CLK) == 0)
+        if ((clock % con->PPU->CLK) == 0)
         {
             // DO PPU CYCLE
         }
     }
 }
 
-void SET_TIMING (registers *reg, ppu *gpu, uint8_t timing)
+void SET_TIMING (nes con, uint8_t timing)
 {
     switch (timing)
     {
         case 1:
-            reg->CLK = CPU_PAL;
-            gpu->CLK = PPU_PAL;
+            con->CPU->CLK = CPU_PAL;
+            con->PPU->CLK = PPU_PAL;
             break;
         default:
-            reg->CLK = CPU_NTSC;
-            gpu->CLK = PPU_NTSC;
+            con->CPU->CLK = CPU_NTSC;
+            con->PPU->CLK = PPU_NTSC;
             break;
     }
 }
@@ -120,25 +118,28 @@ int main (int argc, char *argv[])
     (void) argc;
     (void) argv;
     
-    registers reg = {0};
-    RESET_CPU(&reg);
-    memory mem = {0};
-    if (INIT_MEM(&mem)) return 1;
+    processor reg = {0};
+    nesheader head = {0};
+    cartridge crt = {0};
+    graphics gpu = {0};
+    audio aud = {0};
+    console con = {&head, &reg, &gpu, &crt, &aud};
+    //if (INIT_MEM(&mem)) return 1;
     FILE *rom = fopen("roms/test.nes", "rb");
     if (!rom) return 1;
-    nesheader head = {0};
-    cartridge cart = {0};
-    ppu gpu = {0};
-    if (LOAD_ROM(rom, &head, &mem, &cart))
-        return 1;
-    if (INIT_NT(&head, &cart))
-        return 1;
-    SET_TIMING(&reg, &gpu, head.TIMING);
+    
 
-    LOOP(&reg, &mem, &cart, &gpu);
+    RESET_CPU(&con);
+    if (LOAD_ROM(rom, &con))
+        return 1;
+    if (INIT_NT(&con))
+        return 1;
+    SET_TIMING(&con, con.HEAD->TIMING);
 
-    FREE_NT(&cart);
-    FREE_MEM(&mem);
+    LOOP(&con);
+
+    FREE_NT(&con);
+    //FREE_MEM(&mem);
     fclose(rom);
     return 0;
 }

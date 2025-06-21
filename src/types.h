@@ -3,6 +3,13 @@
 
 #include <stdint.h>
 
+typedef enum
+{
+    FETCH = 0x00,
+    MEMOP = 0x01,
+    WORK = 0x02
+} cpuphase;
+
 typedef struct
 {
     uint8_t A; // Accumulator
@@ -13,7 +20,12 @@ typedef struct
     uint8_t P; // Status Register
     
     uint8_t CLK; // Not a register, rather the clock freq
-} registers;
+    uint8_t RAM[0x0800];
+    uint8_t IO[0x04];
+    uint8_t *OPR;
+
+    cpuphase PHS;
+} processor, *cpu;
 
 typedef struct
 {
@@ -32,24 +44,24 @@ typedef struct
     memtype CHR_RAM;
     memtype CHR_NV;
     uint8_t NTCOUNT;
-} mapper;
+} mapper, *map;
 
 typedef struct
 {
     uint8_t **PTR;
     uint8_t *ARR;
     uint8_t COUNT;
-} bank;
+} membank, *bank;
 
 typedef struct 
 {
-    bank PRG;
-    bank CHR;
-    bank RAM;
-    bank NT;
+    membank PRG;
+    membank CHR;
+    membank RAM;
+    membank NT;
     mapper *MAP;
-} cartridge;
-
+} cartridge, *cart;
+/*
 typedef struct
 {
     uint8_t *RAM;
@@ -57,7 +69,7 @@ typedef struct
     uint8_t *APUIO;
     uint8_t *TEST;
 } memory;
-
+*/
 typedef struct 
 {
     char ID[5];
@@ -71,7 +83,7 @@ typedef struct
     uint8_t SYSTYPE;
     uint8_t MISCROMS;
     uint8_t DEFEXP;
-} nesheader;
+} nesheader, *head;
 /*
 typedef struct
 {
@@ -82,6 +94,25 @@ typedef struct
     uint8_t *NT2;
     uint8_t *NT3;
 } ppumem;
+
+typedef enum
+{
+    PPUCTRL = 0x00,
+    PPUMASK = 0x01,
+    PPUSTAT = 0x02,
+    OAMADDR = 0x03,
+    OAMDATA = 0x04,
+    PPUSCRL = 0x05,
+    PPUADDR = 0x06,
+    PPUDATA = 0x07,
+} ppuregs;
+
+typedef enum
+{
+    FETCH_INST = 0x00,
+    FETCH_MEM = 0x01,
+    WORK = 0x02
+} cpuphase, *cphase;
 */
 typedef struct
 {
@@ -98,6 +129,8 @@ typedef struct
     uint8_t HIT;
     uint8_t EVN;
 
+    uint8_t REG[0x08];
+
     uint16_t BGL;
     uint16_t BGH;
     uint8_t SPL[0x08];
@@ -113,6 +146,22 @@ typedef struct
     uint8_t PLT[0x20];
     uint8_t OAM[0x0100];
     uint8_t OAS[0x20];
-} ppu;
+} graphics, *ppu;
+
+typedef struct
+{
+    uint8_t REG[0x14];
+} audio, *apu;
+
+typedef struct
+{
+    head HEAD;
+    cpu CPU;
+    ppu PPU;
+    cart CART;
+    apu APU;
+} console, *nes;
+
+typedef uint8_t (*operation) (nes);
 
 #endif
