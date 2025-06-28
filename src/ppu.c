@@ -31,7 +31,7 @@ uint8_t INIT_NT (nes con)
                 for (uint8_t nt = 1; nt < ntlim; nt++)
                         mem->ARR[nt] = nt;
             // Other mappers here
-                    
+            break;                    
     }
     return 0;
 }
@@ -57,34 +57,134 @@ uint8_t BG_RENDER (nes con)
     return 0;
 }
 
+void INC_V (nes con)
+{
+    uint16_t *cyc = &con->PPU->CYC;
+    uint16_t *v = &con->PPU->V;
+
+    if (*cyc <= 256 || *cyc > 320)
+    {
+        if ((*v & V_X_LIMIT) == V_X_LIMIT)
+        {
+            *v &= ~V_X_LIMIT;
+            *v ^= NT_PAGE;
+        }
+        else (*v)++;
+    }
+    if (*cyc == 256)
+    {
+        if ((*v & 0x7000) != 0x7000)
+            *v += 0x1000;
+        else
+        {
+            *v &= ~0x7000;
+            uint16_t y = (*v & V_Y_LIMIT) >> 5;
+            switch (y)
+            {
+                case 29:
+                    *v ^= 0x8000;
+                    __attribute__((fallthrough));
+                case 31:
+                    y = 0;
+                    break;
+                default:
+                    y++;
+            }
+            *v = (*v & ~V_Y_LIMIT) | (y << 5);
+        }
+    }
+}
+
+uint8_t VBLANK (nes con)
+{
+    uint16_t *cyc = &con->PPU->CYC;
+    uint16_t *scl = &con->PPU->SCL;
+    uint8_t *stat = &con->PPU->REG[PPUSTATUS];
+
+    if (*scl == 240 && *cyc == 0)
+        return 1; // BG lsbit
+    if (*cyc == 1)
+    {
+        if (*scl == 241)
+            *stat |= 0x80;
+        else if (*scl == 261)
+            *stat &= ~0xE0;
+        return 1;
+    }
+    if (*scl != 261 || *cyc == 0)
+        return 1;
+    return 0;
+}
+
+uint8_t HBLANK (nes con)
+{
+    uint16_t *cyc = &con->PPU->CYC;
+    uint16_t *scl = &con->PPU->SCL;
+    uint16_t *v = &con->PPU->V;
+
+    if (*scl == 261 && *cyc >= 280 && *cyc <= 304)
+    {
+        *v &= ~V_Y_LIMIT;
+        *v |= con->PPU->T & V_Y_LIMIT;
+    }
+
+    switch (*cyc % 8)
+    {
+        case 5:
+            __attribute__((fallthrough));
+        case 6:
+            break;
+        case 7:
+            __attribute__((fallthrough));
+        case 0:
+            break;
+    }
+
+    return 0;
+}
+
 uint8_t PPU_CYCLE (nes con)
 {
-    switch (con->PPU->CYC % 8)
+    uint16_t *cyc = &con->PPU->CYC;
+    uint16_t *scl = &con->PPU->SCL;
+    uint16_t *v = &con->PPU->V;
+
+    if (*scl > 239)
+        if (VBLANK(con))
+            return 0;
+
+    if (*cyc >= 261 && *cyc <= 320)
+        if (HBLANK(con))
+            return 0;
+
+    switch (*cyc % 8)
     {
         case 0:
-            switch (con->PPU->SCL)
-            {
-                case 0:
-                    if (con->PPU->EVN)
-                        return 1; // skip frame
-                    else if (!(con->PPU->CYC))
-                        return 1;  // BG lsbit
-            }
-            if (!(con->PPU->SCL))
-            {
-                if (con->PPU->EVN)
-                    return 1; // skip even frame
-                
-            }
-            return 1; // do BG lsbit
+            if (*cyc == 0)
+                return 0; // BG lsbit
+            INC_V(con);
             break;
         case 1:
-            //con->PPU->V;
+            if (*cyc == 257)
+            {
+                *v &= ~V_X_LIMIT;
+                *v |= con->PPU->T & V_X_LIMIT; 
+                break;
+            }
+            __attribute__((fallthrough));
         case 2:
-        // NT high(?) byte fetch
+            break;
         case 3:
-        // AT 
-        default:
-            return 0;
+            __attribute__((fallthrough));
+        case 4:
+            break;
+        case 5:
+            __attribute__((fallthrough));
+        case 6:
+            break;
+        case 7:
+            break;
     }
+
+    return 0;
 }

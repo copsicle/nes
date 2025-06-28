@@ -29,6 +29,9 @@
 #define PPUADDR 0x06
 #define PPUDATA 0x07
 
+#define V_X_LIMIT 0x001F
+#define V_Y_LIMIT 0x03E0
+
 struct nes;
 
 uint8_t INIT_NT (nes con);
